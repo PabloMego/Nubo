@@ -1,0 +1,246 @@
+/* File Manager */
+.files-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.files-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.files-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.crumb-link {
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.crumb-link:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.crumb-current {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.files-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.files-search-input {
+  width: 180px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+/* Dropzone Overlay for Drag and Drop from Windows Explorer */
+.file-dropzone-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.file-dropzone-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 2px dashed var(--accent-primary);
+  border-radius: var(--radius-md);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-sm);
+  color: var(--text-primary);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.file-dropzone-wrapper.dragover .file-dropzone-overlay {
+  display: flex;
+}
+
+/* File Grid View */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-md);
+  padding: var(--space-xs);
+}
+
+.file-item-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  user-select: none;
+}
+
+.file-item-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.file-item-card.selected {
+  border-color: var(--border-focus);
+  background-color: var(--bg-subtle);
+}
+
+.file-thumbnail-container {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-xs);
+  overflow: hidden;
+  position: relative;
+}
+
+.file-thumbnail-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+.file-thumbnail-container svg {
+  width: 32px;
+  height: 32px;
+  color: var(--text-secondary);
+}
+
+.file-name-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-meta-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* File List View */
+.file-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.file-list-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-subtle);
+}
+
+.file-list-table td {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.file-list-table tr:last-child td {
+  border-bottom: none;
+}
+
+.file-list-table tr:hover td {
+  background-color: var(--bg-hover);
+  cursor: pointer;
+}
+
+.file-row-name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.file-row-name svg {
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+}
+
+/* File Context Menu */
+.context-menu {
+  position: fixed;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+}
+
+.context-menu-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.context-menu-item.danger {
+  color: var(--status-danger);
+}
+
+.context-menu-item.danger:hover {
+  background-color: var(--status-danger-bg);
+}

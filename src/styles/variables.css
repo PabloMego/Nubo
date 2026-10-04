@@ -1,0 +1,88 @@
+:root {
+  /* Color Palette */
+  --bg-app: #FAFAFA;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F5F5F5;
+  --bg-hover: #EFEFEF;
+  --bg-active: #E8E8E8;
+  
+  --border-subtle: #EAEAEA;
+  --border-strong: #D5D5D5;
+  --border-focus: #111111;
+
+  --text-primary: #111111;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --text-inverse: #FFFFFF;
+
+  /* Accent & Status */
+  --accent-primary: #111111;
+  --accent-hover: #262626;
+  --accent-light: #F0F0F0;
+  --accent-tint: rgba(17, 17, 17, 0.05);
+
+  --status-active: #10B981;
+  --status-active-bg: rgba(16, 185, 129, 0.08);
+  --status-warning: #F59E0B;
+  --status-warning-bg: rgba(245, 158, 11, 0.08);
+  --status-danger: #EF4444;
+  --status-danger-bg: rgba(239, 68, 68, 0.08);
+  --status-info: #3B82F6;
+  --status-info-bg: rgba(59, 130, 246, 0.08);
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Sizing & Spacing */
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 64px;
+  --header-height: 54px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Transitions & Shadows */
+  --transition-fast: 120ms ease;
+  --transition-normal: 180ms ease;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode theme variables for Settings Appearance toggle */
+[data-theme="dark"] {
+  --bg-app: #121212;
+  --bg-surface: #1A1A1A;
+  --bg-subtle: #222222;
+  --bg-hover: #2A2A2A;
+  --bg-active: #333333;
+
+  --border-subtle: #2C2C2C;
+  --border-strong: #3D3D3D;
+  --border-focus: #FFFFFF;
+
+  --text-primary: #EEEEEE;
+  --text-secondary: #9E9E9E;
+  --text-muted: #666666;
+  --text-inverse: #111111;
+
+  --accent-primary: #EEEEEE;
+  --accent-hover: #FFFFFF;
+  --accent-light: #2A2A2A;
+  --accent-tint: rgba(255, 255, 255, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 16px 36px rgba(0, 0, 0, 0.5);
+}

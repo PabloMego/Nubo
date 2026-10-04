@@ -1,0 +1,32 @@
+appId: com.nubo.workspace
+productName: Nubo
+copyright: Copyright © 2026 Nubo
+npmRebuild: false
+asarUnpack:
+  - "node_modules/sql.js/**/*"
+directories:
+  output: release
+  buildResources: build
+files:
+  - "dist/**/*"
+  - "dist-electron/**/*"
+  - "node_modules/sql.js/**/*"
+  - "package.json"
+win:
+  target:
+    - dir
+  artifactName: "${productName}-Setup-${version}.${ext}"
+  sign: null
+  signAndEditExecutable: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: "Nubo"
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+  artifactName: "${productName}-${version}.${ext}"

@@ -1,0 +1,122 @@
+/* Notes View Styles */
+.notes-container {
+  display: flex;
+  height: calc(100vh - var(--header-height) - 150px);
+  min-height: 480px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.notes-sidebar {
+  width: 300px;
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-subtle);
+  flex-shrink: 0;
+}
+
+.notes-sidebar-header {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notes-sidebar-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.note-item {
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  border: 1px solid transparent;
+}
+
+.note-item:hover {
+  background-color: var(--bg-hover);
+}
+
+.note-item.active {
+  background-color: var(--bg-surface);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.note-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-item-preview {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--bg-surface);
+}
+
+.note-editor-header {
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.note-title-input {
+  font-size: 18px;
+  font-weight: 600;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-primary);
+  width: 60%;
+  padding: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.note-body-textarea {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  resize: none;
+  box-shadow: none !important;
+  outline: none !important;
+}

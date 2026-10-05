@@ -254,15 +254,18 @@ export class DevelopmentService {
 
   public getEffectiveTargetFolder(folderPath: string): string {
     const norm = path.normalize(folderPath);
+    const lower = norm.toLowerCase();
 
-    if (norm.endsWith(path.join('Website', 'Proyecto')) || norm.endsWith(path.join('website', 'proyecto'))) {
+    // 1. Explicit Website/Proyecto path
+    if (lower.endsWith(path.sep + 'website' + path.sep + 'proyecto') || lower.endsWith('/website/proyecto') || lower.endsWith('\\website\\proyecto')) {
       if (!fs.existsSync(norm)) {
         try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
       }
       return norm;
     }
 
-    if (norm.endsWith(path.sep + 'Website') || norm.endsWith('Website')) {
+    // 2. Website section folder -> append /Proyecto
+    if (lower.endsWith(path.sep + 'website') || lower.endsWith('/website') || lower.endsWith('\\website')) {
       const webProyecto = path.join(norm, 'Proyecto');
       if (!fs.existsSync(webProyecto)) {
         try { fs.mkdirSync(webProyecto, { recursive: true }); } catch (e) {}
@@ -270,13 +273,32 @@ export class DevelopmentService {
       return webProyecto;
     }
 
-    if (norm.endsWith(path.join('Development', 'Proyecto')) || norm.endsWith('Proyecto')) {
+    // 3. Explicit Development/Proyecto path
+    if (lower.endsWith(path.sep + 'development' + path.sep + 'proyecto') || lower.endsWith('/development/proyecto') || lower.endsWith('\\development\\proyecto')) {
       if (!fs.existsSync(norm)) {
         try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
       }
       return norm;
     }
 
+    // 4. Development section folder -> append /Proyecto
+    if (lower.endsWith(path.sep + 'development') || lower.endsWith('/development') || lower.endsWith('\\development')) {
+      const devProyecto = path.join(norm, 'Proyecto');
+      if (!fs.existsSync(devProyecto)) {
+        try { fs.mkdirSync(devProyecto, { recursive: true }); } catch (e) {}
+      }
+      return devProyecto;
+    }
+
+    // 5. Any folder already ending with 'Proyecto'
+    if (lower.endsWith(path.sep + 'proyecto') || lower.endsWith('/proyecto') || lower.endsWith('\\proyecto')) {
+      if (!fs.existsSync(norm)) {
+        try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
+      }
+      return norm;
+    }
+
+    // 6. Project root folder -> Development/Proyecto by default
     const devFolder = path.join(norm, 'Development');
     if (!fs.existsSync(devFolder)) {
       try { fs.mkdirSync(devFolder, { recursive: true }); } catch (e) {}
@@ -428,65 +450,34 @@ export class DevelopmentService {
   }
 
   public getGitWorkingDir(folderPath: string): string {
-    const norm = path.normalize(folderPath);
-
-    if (norm.endsWith(path.join('Website', 'Proyecto')) || norm.endsWith(path.join('website', 'proyecto'))) {
-      if (!fs.existsSync(norm)) {
-        try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
-      }
-      return norm;
-    }
-
-    if (norm.endsWith(path.sep + 'Website') || norm.endsWith('Website')) {
-      const webProyecto = path.join(norm, 'Proyecto');
-      if (!fs.existsSync(webProyecto)) {
-        try { fs.mkdirSync(webProyecto, { recursive: true }); } catch (e) {}
-      }
-      return webProyecto;
-    }
-
-    if (norm.endsWith(path.join('Development', 'Proyecto')) || norm.endsWith('Proyecto')) {
-      if (!fs.existsSync(norm)) {
-        try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
-      }
-      return norm;
-    }
-
-    const devFolder = path.join(norm, 'Development');
-    if (!fs.existsSync(devFolder)) {
-      try { fs.mkdirSync(devFolder, { recursive: true }); } catch (e) {}
-    }
-    const devProyecto = path.join(devFolder, 'Proyecto');
-    if (!fs.existsSync(devProyecto)) {
-      try { fs.mkdirSync(devProyecto, { recursive: true }); } catch (e) {}
-    }
-    return devProyecto;
+    return this.getEffectiveTargetFolder(folderPath);
   }
 
   /**
-   * Checks whether the target folder is actually a valid Git repository for this project,
-   * preventing stray parent repositories (like C:\Users\<name>\.git) from falsely capturing this folder.
+   * Checks whether the target folder is actually a valid Git repository for this specific folder,
+   * strictly preventing parent repositories or sibling folders from falsely claiming this folder.
    */
-  public async isProjectGitRepo(target: string, folderPath?: string): Promise<boolean> {
-    if (!fs.existsSync(target)) return false;
+  public async isProjectGitRepo(target: string, _folderPath?: string): Promise<boolean> {
+    if (!target || !fs.existsSync(target)) return false;
 
-    // Direct .git directory in target or folderPath
-    if (fs.existsSync(path.join(target, '.git'))) return true;
-    if (folderPath && fs.existsSync(path.join(folderPath, '.git'))) return true;
+    // Strict rule: The target folder ITSELF must directly contain a .git directory.
+    // Sibling folders (e.g. Development vs Website) or parent folders (e.g. project root or C:\Users)
+    // MUST NEVER share a git repository!
+    const directGit = path.join(target, '.git');
+    if (!fs.existsSync(directGit)) return false;
 
     // Check git work tree
     const isInside = await this.runExec('git rev-parse --is-inside-work-tree', target).catch(() => 'false');
     if (isInside !== 'true') return false;
 
-    // Ensure the top-level repo is actually inside the project and not in an unrelated parent like C:\Users\<username>
+    // Ensure the top-level repo is strictly THIS target folder
     const topLevel = await this.runExec('git rev-parse --show-toplevel', target).catch(() => '');
     if (!topLevel) return false;
 
     const normTop = path.normalize(topLevel).toLowerCase();
     const normTarget = path.normalize(target).toLowerCase();
-    const normFolder = folderPath ? path.normalize(folderPath).toLowerCase() : '';
 
-    return normTop === normTarget || (normFolder !== '' && (normTop === normFolder || normTop.startsWith(normFolder + path.sep)));
+    return normTop === normTarget;
   }
 
   public async getGitStatus(folderPath: string): Promise<GitStatusResult> {
@@ -764,39 +755,28 @@ export class DevelopmentService {
   }
 
   public async gitRemoveRepo(folderPath: string): Promise<{ success: boolean; message: string }> {
-    const norm = path.normalize(folderPath);
-    const targets = [
-      path.join(norm, 'Development', 'Proyecto', '.git'),
-      path.join(norm, 'Development', '.git'),
-      path.join(norm, 'Proyecto', '.git'),
-      path.join(norm, '.git')
-    ];
+    const target = this.getGitWorkingDir(folderPath);
+    const gitDir = path.join(target, '.git');
 
-    let removedAny = false;
+    if (!fs.existsSync(gitDir)) {
+      return { success: false, message: 'No se encontró repositorio Git (.git) para eliminar en esta carpeta.' };
+    }
 
-    for (const gitPath of targets) {
-      if (fs.existsSync(gitPath)) {
+    try {
+      fs.rmSync(gitDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch (err) {
+      if (process.platform === 'win32') {
         try {
-          fs.rmSync(gitPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
-        } catch (err) {
-          if (process.platform === 'win32') {
-            try {
-              await this.runExec(`attrib -r -s -h "${gitPath}\\*" /s /d`, norm).catch(() => {});
-              await this.runExec(`rmdir /s /q "${gitPath}"`, norm).catch(() => {});
-            } catch (e) {}
-          }
-        }
-
-        if (!fs.existsSync(gitPath)) {
-          removedAny = true;
-        }
+          await this.runExec(`attrib -r -s -h "${gitDir}\\*" /s /d`, target).catch(() => {});
+          await this.runExec(`rmdir /s /q "${gitDir}"`, target).catch(() => {});
+        } catch (e) {}
       }
     }
 
-    if (removedAny) {
-      return { success: true, message: 'Git eliminado del proyecto.' };
+    if (!fs.existsSync(gitDir)) {
+      return { success: true, message: 'Git eliminado correctamente de esta carpeta.' };
     }
-    return { success: false, message: 'No se encontró repositorio Git (.git) para eliminar.' };
+    return { success: false, message: 'No se pudo eliminar el directorio .git.' };
   }
 
   public async gitPush(folderPath: string, commitMessage?: string): Promise<{ success: boolean; message: string }> {

@@ -35,10 +35,13 @@ export class DevelopmentPage {
     if (!project) return;
 
     try {
+      // Dedicated Development folder path: Project/Development/Proyecto
+      const devCodePath = project.folder_path ? `${project.folder_path}\\Development\\Proyecto` : '';
+
       // Invalidate git status cache if switched to a different project/folder
-      if (DevelopmentPage.cachedGitStatusFolder !== project.folder_path) {
+      if (DevelopmentPage.cachedGitStatusFolder !== devCodePath) {
         DevelopmentPage.cachedGitStatus = null;
-        DevelopmentPage.cachedGitStatusFolder = project.folder_path;
+        DevelopmentPage.cachedGitStatusFolder = devCodePath;
       }
 
       // Ensure development folders exist on disk
@@ -96,8 +99,8 @@ export class DevelopmentPage {
       let gitStatus = DevelopmentPage.cachedGitStatus;
       if ((DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview' || DevelopmentPage.activeTab === 'code') && !gitStatus) {
         try {
-          if (window.nubo?.development?.getGitStatus && project.folder_path) {
-            gitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+          if (window.nubo?.development?.getGitStatus && devCodePath) {
+            gitStatus = await window.nubo.development.getGitStatus(devCodePath);
           }
         } catch (err) {
           console.warn('[DevelopmentPage] Error loading git status:', err);
@@ -114,14 +117,14 @@ export class DevelopmentPage {
           };
         }
         DevelopmentPage.cachedGitStatus = gitStatus;
-        DevelopmentPage.cachedGitStatusFolder = project.folder_path;
+        DevelopmentPage.cachedGitStatusFolder = devCodePath;
       }
 
       // Check if project folder exists on disk
       let folderExists = true;
       try {
-        if (window.nubo?.development?.checkFolder && project.folder_path) {
-          const check = await window.nubo.development.checkFolder(project.folder_path);
+        if (window.nubo?.development?.checkFolder && devCodePath) {
+          const check = await window.nubo.development.checkFolder(devCodePath);
           folderExists = check.exists;
         }
       } catch {
@@ -1224,7 +1227,7 @@ export class DevelopmentPage {
       container.querySelectorAll('#btn-open-in-editor').forEach(btn => {
         btn.addEventListener('click', async () => {
           const cmd = settings?.configuredEditor?.command || 'antigravity-ide';
-          const res = await window.nubo.development.openInEditor(project.folder_path, cmd);
+          const res = await window.nubo.development.openInEditor(devCodePath, cmd);
           if (res.success) {
             showToast(`Proyecto abierto con ${settings?.configuredEditor?.name || 'editor'}.`);
           } else {
@@ -1237,21 +1240,21 @@ export class DevelopmentPage {
       // Open Folder
       container.querySelectorAll('#btn-open-folder').forEach(btn => {
         btn.addEventListener('click', async () => {
-          await window.nubo.development.openFolder(project.folder_path);
+          await window.nubo.development.openFolder(devCodePath);
         });
       });
 
       // Open Terminal
       container.querySelectorAll('#btn-open-terminal').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const res = await window.nubo.development.openTerminal(project.folder_path);
+          const res = await window.nubo.development.openTerminal(devCodePath);
           if (!res.success) alert(res.error || 'Error al abrir terminal.');
         });
       });
 
       // Create Folder
       container.querySelector('#btn-create-folder')?.addEventListener('click', async () => {
-        const res = await window.nubo.development.createFolder(project.folder_path);
+        const res = await window.nubo.development.createFolder(devCodePath);
         if (res.success) {
           showToast('Carpeta creada con éxito.');
           DevelopmentPage.render(container);
@@ -1284,7 +1287,7 @@ export class DevelopmentPage {
       container.querySelector('#btn-git-push')?.addEventListener('click', () => {
         const currentGit = DevelopmentPage.cachedGitStatus;
         modalManager.openGitPushModal({
-          folderPath: project.folder_path,
+          folderPath: devCodePath,
           branch: currentGit?.currentBranch || 'main',
           hasChanges: currentGit?.hasChanges,
           statusText: currentGit?.statusText,
@@ -1293,9 +1296,9 @@ export class DevelopmentPage {
             if (btn) btn.disabled = true;
             showToast('Enviando cambios a GitHub (push)...', 'info');
             try {
-              const res = await window.nubo.development.gitPush(project.folder_path, commitMsg);
+              const res = await window.nubo.development.gitPush(devCodePath, commitMsg);
               showToast(res.message, res.success ? 'success' : 'error');
-              DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+              DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(devCodePath);
               DevelopmentPage.render(container);
             } catch (err: any) {
               showToast(err.message || 'Error en push', 'error');
@@ -1313,9 +1316,9 @@ export class DevelopmentPage {
         if (btn) btn.disabled = true;
         showToast('Descargando cambios desde GitHub (pull)...', 'info');
         try {
-          const res = await window.nubo.development.gitPull(project.folder_path);
+          const res = await window.nubo.development.gitPull(devCodePath);
           showToast(res.message, res.success ? 'success' : 'error');
-          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(devCodePath);
           DevelopmentPage.render(container);
         } catch (err: any) {
           showToast(err.message || 'Error en pull', 'error');
@@ -1326,10 +1329,10 @@ export class DevelopmentPage {
 
       // Git Init
       container.querySelector('#btn-init-git')?.addEventListener('click', async () => {
-        const res = await window.nubo.development.gitInit(project.folder_path);
+        const res = await window.nubo.development.gitInit(devCodePath);
         if (res.success) {
           showToast('Repositorio Git inicializado.');
-          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(devCodePath);
           DevelopmentPage.render(container);
         } else {
           alert(res.message);
@@ -1338,8 +1341,8 @@ export class DevelopmentPage {
 
       // Connect Repo
       container.querySelector('#btn-connect-repo')?.addEventListener('click', () => {
-        modalManager.openConnectGitModal(project.folder_path, DevelopmentPage.cachedGitStatus?.remoteUrl || '', async () => {
-          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+        modalManager.openConnectGitModal(devCodePath, DevelopmentPage.cachedGitStatus?.remoteUrl || '', async () => {
+          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(devCodePath);
           DevelopmentPage.render(container);
         });
       });
@@ -1356,7 +1359,7 @@ export class DevelopmentPage {
         if (confirm('¿Desconectar el repositorio remoto de GitHub? (El código local no se borrará)')) {
           showToast('Desconectando repositorio remoto...');
           try {
-            const res = await window.nubo.development.gitDisconnectRemote(project.folder_path);
+            const res = await window.nubo.development.gitDisconnectRemote(devCodePath);
             showToast(res.message);
           } catch (err: any) {
             console.error('[Git] Error disconnecting remote:', err);
@@ -1373,7 +1376,7 @@ export class DevelopmentPage {
           if (confirm('¿Eliminar el control de versiones Git (.git) de este proyecto? No se borrarán tus archivos de código, pero el proyecto dejará de tener Git.')) {
             showToast('Eliminando Git...');
             try {
-              const res = await window.nubo.development.gitRemoveRepo(project.folder_path);
+              const res = await window.nubo.development.gitRemoveRepo(devCodePath);
               showToast(res.message);
             } catch (err: any) {
               console.error('[Git] Error removing repo:', err);
@@ -1388,7 +1391,7 @@ export class DevelopmentPage {
       // Refresh Git
       container.querySelectorAll('#btn-refresh-git').forEach(btn => {
         btn.addEventListener('click', async () => {
-          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+          DevelopmentPage.cachedGitStatus = await window.nubo.development.getGitStatus(devCodePath);
           showToast('Estado de Git actualizado.');
           DevelopmentPage.render(container);
         });

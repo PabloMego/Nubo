@@ -196,6 +196,9 @@ const translations = {
     'brand.tabGraphics': 'Iconografía & Gráficos',
     'brand.tabManual': 'Manual de Marca (PDF)',
     'brand.tabFiles': 'Archivos & Assets',
+    'brand.tabTasks': 'Tareas',
+    'brand.tasksTitle': 'Tareas de Marca & Assets',
+    'brand.tasksDesc': 'Seguimiento visual de tareas de diseño, logotipos, paleta de colores y manual de marca.',
 
     // Brand - Identity
     'brand.identityTitle': 'Identidad & Propósito',
@@ -742,6 +745,9 @@ const translations = {
     'brand.tabGraphics': 'Iconography & Graphics',
     'brand.tabManual': 'Brand Manual (PDF)',
     'brand.tabFiles': 'Files & Assets',
+    'brand.tabTasks': 'Tasks',
+    'brand.tasksTitle': 'Brand & Assets Tasks',
+    'brand.tasksDesc': 'Visual tracking for design, logos, color palette, and brand manual tasks.',
 
     // Brand - Identity
     'brand.identityTitle': 'Identity & Purpose',

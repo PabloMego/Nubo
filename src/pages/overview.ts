@@ -81,18 +81,6 @@ export class OverviewPage {
                 </div>
               </div>
             </div>
-            <div class="page-stats-badge" title="Progreso del proyecto">
-              <span class="pulse-dot" style="background: ${totalTasks > 0 && taskProgress === 100 ? '#10B981' : totalTasks === 0 ? 'var(--text-muted)' : '#3B82F6'};"></span>
-              <span><strong>${totalTasks > 0 ? `${taskProgress}% completado` : (getLanguage() === 'es' ? 'Sin tareas' : 'No tasks')}</strong></span>
-            </div>
-            <div class="page-stats-badge" title="Tareas pendientes en backlog">
-              ${icons.checkSquare(13)}
-              <span><strong>${totalTasks === 0 ? (getLanguage() === 'es' ? 'No hay tareas' : 'No tasks') : `${pendingTasks.length} pendientes`}</strong></span>
-            </div>
-            <div class="page-stats-badge" title="Actividades registradas">
-              ${icons.activity(13)}
-              <span><strong>${activities.length}</strong> eventos</span>
-            </div>
           </div>
           <p class="page-subtitle">${project.description || t('overview.defaultDesc')}</p>
         </div>

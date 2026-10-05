@@ -360,7 +360,7 @@ declare global {
         getById(id: string): Promise<Project | undefined>;
         create(data: any): Promise<Project>;
         update(id: string, data: any): Promise<Project | undefined>;
-        delete(id: string, deleteFiles: boolean): Promise<boolean>;
+        delete(id: string, deleteFiles?: boolean): Promise<boolean>;
         getActivities(projectId: string): Promise<Activity[]>;
       };
       files: {

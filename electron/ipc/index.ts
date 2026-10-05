@@ -47,7 +47,7 @@ export function registerIpcHandlers(): void {
     return projectService.update(id, data);
   });
 
-  ipcMain.handle('nubo:projects:delete', async (_, id: string, deleteFiles: boolean) => {
+  ipcMain.handle('nubo:projects:delete', async (_, id: string, deleteFiles: boolean = true) => {
     return projectService.delete(id, deleteFiles);
   });
 

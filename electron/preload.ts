@@ -6,7 +6,7 @@ const nuboApi = {
     getById: (id: string) => ipcRenderer.invoke('nubo:projects:getById', id),
     create: (data: any) => ipcRenderer.invoke('nubo:projects:create', data),
     update: (id: string, data: any) => ipcRenderer.invoke('nubo:projects:update', id, data),
-    delete: (id: string, deleteFiles: boolean) => ipcRenderer.invoke('nubo:projects:delete', id, deleteFiles),
+    delete: (id: string, deleteFiles: boolean = true) => ipcRenderer.invoke('nubo:projects:delete', id, deleteFiles),
     getActivities: (projectId: string) => ipcRenderer.invoke('nubo:projects:getActivities', projectId)
   },
   files: {

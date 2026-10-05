@@ -159,10 +159,10 @@ export class HomePage {
       </p>
       <div style="background-color: var(--bg-subtle); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
         <label style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer; font-size: 13px;">
-          <input type="checkbox" id="check-delete-physical-files" style="margin-top: 3px; cursor: pointer;" />
+          <input type="checkbox" id="check-delete-physical-files" checked style="margin-top: 3px; cursor: pointer;" />
           <div>
             <strong>${t('deleteModal.deletePhysical')}</strong>
-            <div style="font-size: 11px; color: var(--text-muted);">${proj.folder_path}</div>
+            <div style="font-size: 11px; color: var(--text-muted); word-break: break-all; margin-top: 2px;">${proj.folder_path}</div>
           </div>
         </label>
       </div>
@@ -182,7 +182,8 @@ export class HomePage {
     });
 
     document.getElementById('btn-confirm-delete')?.addEventListener('click', async () => {
-      const deleteFiles = (document.getElementById('check-delete-physical-files') as HTMLInputElement)?.checked || false;
+      const deleteFilesInput = document.getElementById('check-delete-physical-files') as HTMLInputElement | null;
+      const deleteFiles = deleteFilesInput ? deleteFilesInput.checked : true;
       modalManager.close();
 
       await window.nubo.projects.delete(proj.id, deleteFiles);

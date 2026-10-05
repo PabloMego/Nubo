@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import { shell } from 'electron';
 import { DatabaseService } from './database.service';
 import { SettingsService } from './settings.service';
 import { FileService } from './file.service';
@@ -238,27 +239,39 @@ export class ProjectService {
     return updated;
   }
 
-  public delete(id: string, deleteFiles: boolean = false): boolean {
+  public async delete(id: string, deleteFiles: boolean = true): Promise<boolean> {
     const existing = this.getById(id);
     if (!existing) return false;
 
     const db = this.dbService.getAdapter();
     
-    // Cascade delete in db
+    // Cascade delete all associated entities in SQLite
     db.run('DELETE FROM activities WHERE project_id = ?', [id]);
     db.run('DELETE FROM tasks WHERE project_id = ?', [id]);
     db.run('DELETE FROM brand_assets WHERE project_id = ?', [id]);
     db.run('DELETE FROM website_info WHERE project_id = ?', [id]);
     db.run('DELETE FROM marketing_items WHERE project_id = ?', [id]);
+    db.run('DELETE FROM marketing_campaigns WHERE project_id = ?', [id]);
+    db.run('DELETE FROM marketing_accounts WHERE project_id = ?', [id]);
+    db.run('DELETE FROM marketing_emails WHERE project_id = ?', [id]);
+    db.run('DELETE FROM marketing_ideas WHERE project_id = ?', [id]);
+    db.run('DELETE FROM marketing_metrics WHERE project_id = ?', [id]);
     db.run('DELETE FROM content_items WHERE project_id = ?', [id]);
     db.run('DELETE FROM notes WHERE project_id = ?', [id]);
+    db.run('DELETE FROM product_specs WHERE project_id = ?', [id]);
     db.run('DELETE FROM projects WHERE id = ?', [id]);
 
+    // Physically delete folder from disk if requested (defaults to true)
     if (deleteFiles && existing.folder_path && fs.existsSync(existing.folder_path)) {
       try {
-        fs.rmSync(existing.folder_path, { recursive: true, force: true });
-      } catch (e) {
-        console.error('Error deleting physical folder:', e);
+        await shell.trashItem(existing.folder_path);
+      } catch (trashErr) {
+        console.warn('[ProjectService] shell.trashItem failed, attempting recursive force delete:', trashErr);
+        try {
+          fs.rmSync(existing.folder_path, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 });
+        } catch (rmErr) {
+          console.error('[ProjectService] Error deleting physical folder:', rmErr);
+        }
       }
     }
 

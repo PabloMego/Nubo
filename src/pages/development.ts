@@ -3,7 +3,7 @@ import { appStore } from '../scripts/store';
 import { modalManager } from '../components/modal';
 import { showToast } from '../components/toast';
 import { Task, ProductSpec, ProductFeature, GitStatusResult } from '../scripts/types';
-import { t } from '../scripts/i18n';
+import { t, getLanguage } from '../scripts/i18n';
 
 export class DevelopmentPage {
   // Navigation tab: 'all' (Todo) | 'code' (Código & Git) | 'kanban' (Tareas) | 'specs' (Especificaciones)

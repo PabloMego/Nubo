@@ -62,12 +62,14 @@ export class Sidebar {
               ${currentProj.logo ? `
                 <img src="${currentProj.logo}" class="sidebar-active-proj-logo" alt="${currentProj.name}" />
               ` : `
-                <span class="sidebar-active-proj-dot" style="background-color: ${currentProj.color || 'var(--accent-primary)'};"></span>
+                <div class="sidebar-active-proj-avatar" style="border-left: 2px solid ${currentProj.color || 'var(--accent-primary)'};">
+                  ${currentProj.name.charAt(0).toUpperCase()}
+                </div>
               `}
               <span class="sidebar-active-proj-name">${currentProj.name}</span>
             </div>
             ${projectSections.map(sec => `
-              <div class="nav-item ${activeSec === sec.id ? 'active' : ''}" data-section="${sec.id}">
+              <div class="nav-item ${activeSec === sec.id ? 'active' : ''}" data-section="${sec.id}" title="${sec.label}">
                 ${sec.icon}
                 <span>${sec.label}</span>
               </div>

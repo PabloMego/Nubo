@@ -37,12 +37,17 @@ async function start() {
   let isRestarting = false;
 
   function runElectron() {
-    child = spawn(electron, ['.'], {
+    const currentChild = spawn(electron, ['.'], {
       stdio: 'inherit',
       env: { ...process.env, NODE_ENV: 'development', VITE_DEV_SERVER_URL: VITE_URL }
     });
+    child = currentChild;
 
-    child.on('close', (code) => {
+    currentChild.on('close', (code) => {
+      if (currentChild !== child) {
+        // An old killed process closed; ignore it
+        return;
+      }
       if (!isRestarting) {
         process.exit(code || 0);
       }

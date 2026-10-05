@@ -34,155 +34,175 @@ export class DevelopmentPage {
     const project = appStore.getState().currentProject;
     if (!project) return;
 
-    // Invalidate git status cache if switched to a different project/folder
-    if (DevelopmentPage.cachedGitStatusFolder !== project.folder_path) {
-      DevelopmentPage.cachedGitStatus = null;
-      DevelopmentPage.cachedGitStatusFolder = project.folder_path;
-    }
-
-    // Ensure development folders exist on disk
-    if (project.folder_path) {
-      try {
-        if (window.nubo?.development?.ensureFolders) {
-          await window.nubo.development.ensureFolders(project.folder_path);
-        }
-      } catch (err) {
-        console.warn('[DevelopmentPage] Error ensuring development folders:', err);
-      }
-    }
-
-    // Load tasks, specs and settings
-    const [allTasks, settings] = await Promise.all([
-      window.nubo.tasks.getByProject(project.id),
-      window.nubo.settings.get()
-    ]);
-
-    // Fetch product specs safely
-    let specs = DevelopmentPage.cachedSpecs;
-    if (!specs || specs.project_id !== project.id) {
-      try {
-        if (window.nubo?.development?.getSpecs) {
-          specs = await window.nubo.development.getSpecs(project.id);
-        }
-      } catch (err) {
-        console.warn('[DevelopmentPage] Error loading specs from backend:', err);
-      }
-      if (!specs) {
-        specs = {
-          id: 'spec_' + project.id,
-          project_id: project.id,
-          what_is_it: project.description || '',
-          problem_solved: '',
-          target_audience: '',
-          goals: '',
-          features: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-      }
-      DevelopmentPage.cachedSpecs = specs;
-    }
-
-    // Fetch git status if in all/code/overview tab and folder exists
-    let gitStatus = DevelopmentPage.cachedGitStatus;
-    if ((DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview' || DevelopmentPage.activeTab === 'code') && !gitStatus) {
-      try {
-        if (window.nubo?.development?.getGitStatus) {
-          gitStatus = await window.nubo.development.getGitStatus(project.folder_path);
-        }
-      } catch (err) {
-        console.warn('[DevelopmentPage] Error loading git status:', err);
-      }
-      if (!gitStatus) {
-        gitStatus = {
-          isGitRepo: false,
-          gitInstalled: true,
-          connectedToGitHub: false,
-          hasChanges: false,
-          modifiedCount: 0,
-          untrackedCount: 0,
-          statusText: 'No conectado'
-        };
-      }
-      DevelopmentPage.cachedGitStatus = gitStatus;
-    }
-
-    // Check if project folder exists on disk
-    let folderExists = true;
     try {
-      if (window.nubo?.development?.checkFolder) {
-        const check = await window.nubo.development.checkFolder(project.folder_path);
-        folderExists = check.exists;
+      // Invalidate git status cache if switched to a different project/folder
+      if (DevelopmentPage.cachedGitStatusFolder !== project.folder_path) {
+        DevelopmentPage.cachedGitStatus = null;
+        DevelopmentPage.cachedGitStatusFolder = project.folder_path;
       }
-    } catch {
-      folderExists = true;
-    }
 
-    // Calculate overall statistics
-    const counts = {
-      all: allTasks.length,
-      todo: allTasks.filter(item => item.status === 'todo').length,
-      in_progress: allTasks.filter(item => item.status === 'in_progress').length,
-      done: allTasks.filter(item => item.status === 'done').length
-    };
-    const completionRate = counts.all > 0 ? Math.round((counts.done / counts.all) * 100) : 0;
+      // Ensure development folders exist on disk
+      if (project.folder_path) {
+        try {
+          if (window.nubo?.development?.ensureFolders) {
+            await window.nubo.development.ensureFolders(project.folder_path);
+          }
+        } catch (err) {
+          console.warn('[DevelopmentPage] Error ensuring development folders:', err);
+        }
+      }
 
-    container.innerHTML = `
-      <div class="dev-container">
-        <!-- Main Hero Header -->
-        <div class="dev-header-hero">
-          <div class="dev-header-left">
-            <div class="dev-title-row">
-              <h1>${t('dev.title')}</h1>
-              <div class="dev-header-stats-badge">
-                ${icons.checkCircle(13)}
-                <span>${counts.all > 0 ? `${completionRate}% ${t('dev.progress')}` : (getLanguage() === 'es' ? 'Sin tareas' : 'No tasks')}</span>
+      // Load tasks, specs and settings safely
+      let allTasks: Task[] = [];
+      let settings: any = {};
+      try {
+        const [loadedTasks, loadedSettings] = await Promise.all([
+          window.nubo?.tasks?.getByProject ? window.nubo.tasks.getByProject(project.id) : [],
+          window.nubo?.settings?.get ? window.nubo.settings.get() : {}
+        ]);
+        allTasks = Array.isArray(loadedTasks) ? loadedTasks : [];
+        settings = loadedSettings || {};
+      } catch (err) {
+        console.warn('[DevelopmentPage] Error loading tasks/settings:', err);
+      }
+
+      // Fetch product specs safely
+      let specs = DevelopmentPage.cachedSpecs;
+      if (!specs || specs.project_id !== project.id) {
+        try {
+          if (window.nubo?.development?.getSpecs) {
+            specs = await window.nubo.development.getSpecs(project.id);
+          }
+        } catch (err) {
+          console.warn('[DevelopmentPage] Error loading specs from backend:', err);
+        }
+        if (!specs) {
+          specs = {
+            id: 'spec_' + project.id,
+            project_id: project.id,
+            what_is_it: project.description || '',
+            problem_solved: '',
+            target_audience: '',
+            goals: '',
+            features: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+        DevelopmentPage.cachedSpecs = specs;
+      }
+
+      // Fetch git status if in all/code/overview tab and folder exists
+      let gitStatus = DevelopmentPage.cachedGitStatus;
+      if ((DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview' || DevelopmentPage.activeTab === 'code') && !gitStatus) {
+        try {
+          if (window.nubo?.development?.getGitStatus && project.folder_path) {
+            gitStatus = await window.nubo.development.getGitStatus(project.folder_path);
+          }
+        } catch (err) {
+          console.warn('[DevelopmentPage] Error loading git status:', err);
+        }
+        if (!gitStatus) {
+          gitStatus = {
+            isGitRepo: false,
+            gitInstalled: true,
+            connectedToGitHub: false,
+            hasChanges: false,
+            modifiedCount: 0,
+            untrackedCount: 0,
+            statusText: 'No conectado'
+          };
+        }
+        DevelopmentPage.cachedGitStatus = gitStatus;
+        DevelopmentPage.cachedGitStatusFolder = project.folder_path;
+      }
+
+      // Check if project folder exists on disk
+      let folderExists = true;
+      try {
+        if (window.nubo?.development?.checkFolder && project.folder_path) {
+          const check = await window.nubo.development.checkFolder(project.folder_path);
+          folderExists = check.exists;
+        }
+      } catch {
+        folderExists = true;
+      }
+
+      // Calculate overall statistics
+      const counts = {
+        all: allTasks.length,
+        todo: allTasks.filter(item => item.status === 'todo').length,
+        in_progress: allTasks.filter(item => item.status === 'in_progress').length,
+        done: allTasks.filter(item => item.status === 'done').length
+      };
+      const completionRate = counts.all > 0 ? Math.round((counts.done / counts.all) * 100) : 0;
+
+      container.innerHTML = `
+        <div class="dev-container">
+          <!-- Main Hero Header -->
+          <div class="dev-header-hero">
+            <div class="dev-header-left">
+              <div class="dev-title-row">
+                <h1>${t('dev.title')}</h1>
+                <div class="dev-header-stats-badge">
+                  ${icons.checkCircle(13)}
+                  <span>${counts.all > 0 ? `${completionRate}% ${t('dev.progress')}` : (getLanguage() === 'es' ? 'Sin tareas' : 'No tasks')}</span>
+                </div>
               </div>
+              <p class="dev-subtitle">${t('dev.subtitle')}</p>
             </div>
-            <p class="dev-subtitle">${t('dev.subtitle')}</p>
+
+            <div class="dev-header-actions">
+              <!-- Global New Task Button -->
+              <button class="btn btn-primary" id="btn-add-dev-task" style="display: inline-flex; align-items: center; gap: 6px;">
+                ${icons.plus(15)}
+                <span>${t('dev.newTask')}</span>
+              </button>
+            </div>
           </div>
 
-          <div class="dev-header-actions">
-            <!-- Global New Task Button -->
-            <button class="btn btn-primary" id="btn-add-dev-task" style="display: inline-flex; align-items: center; gap: 6px;">
-              ${icons.plus(15)}
-              <span>${t('dev.newTask')}</span>
+          <!-- Development Subnav Tabs -->
+          <div class="dev-subnav-tabs">
+            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview' ? 'active' : ''}" data-dev-tab="all">
+              ${icons.grid(14)}
+              <span>${t('dev.tabAll') || 'Todo'}</span>
+            </button>
+            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'code' ? 'active' : ''}" data-dev-tab="code">
+              ${icons.code(14)}
+              <span>${t('dev.tabCode') || 'Código & Git'}</span>
+            </button>
+            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'kanban' ? 'active' : ''}" data-dev-tab="kanban">
+              ${icons.columns(14)}
+              <span>${t('dev.tabKanban') || 'Tareas'} (${counts.all})</span>
+            </button>
+            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'specs' ? 'active' : ''}" data-dev-tab="specs">
+              ${icons.fileText(14)}
+              <span>${t('dev.tabSpecs') || 'Especificaciones'}</span>
             </button>
           </div>
+
+          <!-- TAB CONTENT -->
+          ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview'
+            ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks)
+            : DevelopmentPage.activeTab === 'code'
+            ? DevelopmentPage.renderCodeAndGit(project, settings, gitStatus, folderExists)
+            : DevelopmentPage.activeTab === 'specs'
+            ? DevelopmentPage.renderSpecifications(specs)
+            : DevelopmentPage.renderKanbanView(allTasks, counts, completionRate)}
         </div>
+      `;
 
-        <!-- Development Subnav Tabs -->
-        <div class="dev-subnav-tabs">
-          <button class="dev-tab-item ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview' ? 'active' : ''}" data-dev-tab="all">
-            ${icons.grid(14)}
-            <span>${t('dev.tabAll') || 'Todo'}</span>
-          </button>
-          <button class="dev-tab-item ${DevelopmentPage.activeTab === 'code' ? 'active' : ''}" data-dev-tab="code">
-            ${icons.code(14)}
-            <span>${t('dev.tabCode') || 'Código & Git'}</span>
-          </button>
-          <button class="dev-tab-item ${DevelopmentPage.activeTab === 'kanban' ? 'active' : ''}" data-dev-tab="kanban">
-            ${icons.columns(14)}
-            <span>${t('dev.tabKanban') || 'Tareas'} (${counts.all})</span>
-          </button>
-          <button class="dev-tab-item ${DevelopmentPage.activeTab === 'specs' ? 'active' : ''}" data-dev-tab="specs">
-            ${icons.fileText(14)}
-            <span>${t('dev.tabSpecs') || 'Especificaciones'}</span>
-          </button>
+      DevelopmentPage.bindEvents(container, project, allTasks, specs, settings);
+    } catch (err: any) {
+      console.error('[DevelopmentPage] Render error:', err);
+      container.innerHTML = `
+        <div style="padding: 32px; color: var(--text-primary);">
+          <h3>Error al cargar Desarrollo</h3>
+          <p style="color: var(--text-muted); margin-top: 8px;">${err.message || err}</p>
+          <button class="btn btn-secondary" style="margin-top: 16px;" onclick="location.reload()">Recargar vista</button>
         </div>
-
-        <!-- TAB CONTENT -->
-        ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview'
-          ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks)
-          : DevelopmentPage.activeTab === 'code'
-          ? DevelopmentPage.renderCodeAndGit(project, settings, gitStatus, folderExists)
-          : DevelopmentPage.activeTab === 'specs'
-          ? DevelopmentPage.renderSpecifications(specs)
-          : DevelopmentPage.renderKanbanView(allTasks, counts, completionRate)}
-      </div>
-    `;
-
-    DevelopmentPage.bindEvents(container, project, allTasks, specs, settings);
+      `;
+    }
   }
 
   // ==========================================
@@ -1195,7 +1215,7 @@ export class DevelopmentPage {
 
       // Configure Editor
       container.querySelector('#btn-configure-editor')?.addEventListener('click', () => {
-        modalManager.openConfigureEditorModal(settings.configuredEditor, async () => {
+        modalManager.openConfigureEditorModal(settings?.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' }, async () => {
           DevelopmentPage.render(container);
         });
       });
@@ -1203,13 +1223,13 @@ export class DevelopmentPage {
       // Open in Editor
       container.querySelectorAll('#btn-open-in-editor').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const cmd = settings.configuredEditor?.command || 'antigravity-ide';
+          const cmd = settings?.configuredEditor?.command || 'antigravity-ide';
           const res = await window.nubo.development.openInEditor(project.folder_path, cmd);
           if (res.success) {
-            showToast(`Proyecto abierto con ${settings.configuredEditor?.name || 'editor'}.`);
+            showToast(`Proyecto abierto con ${settings?.configuredEditor?.name || 'editor'}.`);
           } else {
             alert(res.error || 'No se pudo abrir el editor.');
-            modalManager.openConfigureEditorModal(settings.configuredEditor, () => DevelopmentPage.render(container));
+            modalManager.openConfigureEditorModal(settings?.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' }, () => DevelopmentPage.render(container));
           }
         });
       });

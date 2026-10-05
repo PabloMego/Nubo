@@ -199,6 +199,11 @@ export class BrandPage {
 
     const curTab = BrandPage.activeTab;
 
+    // Safety guard: if user navigated away while fetching async data, abort
+    if (appStore.getState().activeSection !== 'brand') {
+      return;
+    }
+
     container.innerHTML = `
       <div class="web-header-hero" style="margin-bottom: var(--space-md);">
         <div class="web-header-left">

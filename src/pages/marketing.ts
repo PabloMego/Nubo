@@ -80,6 +80,11 @@ export class MarketingPage {
     const currentCampaign = campaigns.find(c => c.id === MarketingPage.selectedCampaignId);
     const readyAccountsCount = accounts.filter(a => ['Active', 'Created'].includes(a.status)).length;
 
+    // Safety guard: if user navigated away while fetching async data, abort
+    if (appStore.getState().activeSection !== 'marketing' && appStore.getState().activeSection !== 'content') {
+      return;
+    }
+
     // Top Header & Outer Shell
     container.innerHTML = `
       <div class="mkt-container">

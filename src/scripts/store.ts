@@ -69,6 +69,15 @@ class Store {
 
   public setCurrentProject(project: Project | null) {
     this.state.currentProject = project;
+    if (project && (this.state.activeSection === 'settings' || this.state.activeSection === 'home')) {
+      this.state.activeSection = 'overview';
+    }
+    this.notify();
+  }
+
+  public selectProject(project: Project | null, section: AppSection = 'overview') {
+    this.state.currentProject = project;
+    this.state.activeSection = section;
     this.notify();
   }
 

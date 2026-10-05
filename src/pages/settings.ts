@@ -21,6 +21,11 @@ export class SettingsPage {
       githubAccount = settings.githubAccount || null;
     }
 
+    // Safety guard: if user navigated away from settings while fetching async data, abort
+    if (appStore.getState().activeSection !== 'settings') {
+      return;
+    }
+
     const currentProj = appStore.getState().currentProject;
     const currentLang = getLanguage();
     const isEs = currentLang === 'es';
@@ -658,8 +663,7 @@ export class SettingsPage {
           showToast(t('backup.importSuccess', { name: res.project.name }));
           const all = await window.nubo.projects.getAll();
           appStore.setProjects(all);
-          appStore.setCurrentProject(res.project);
-          appStore.setActiveSection('overview');
+          appStore.selectProject(res.project, 'overview');
         } else if (res.error) {
           showToast(t('backup.importError', { error: res.error }));
         }

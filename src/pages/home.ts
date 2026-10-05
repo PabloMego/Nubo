@@ -68,8 +68,7 @@ export class HomePage {
           showToast(t('backup.importSuccess', { name: res.project.name }));
           const all = await window.nubo.projects.getAll();
           appStore.setProjects(all);
-          appStore.setCurrentProject(res.project);
-          appStore.setActiveSection('overview');
+          appStore.selectProject(res.project, 'overview');
         } else if (res.error) {
           showToast(t('backup.importError', { error: res.error }));
         }
@@ -101,8 +100,7 @@ export class HomePage {
         const id = card.getAttribute('data-project-id');
         const proj = projects.find((p) => p.id === id);
         if (proj) {
-          appStore.setCurrentProject(proj);
-          appStore.setActiveSection('overview');
+          appStore.selectProject(proj, 'overview');
         }
       });
     });

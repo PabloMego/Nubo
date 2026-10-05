@@ -143,6 +143,11 @@ export class DevelopmentPage {
       };
       const completionRate = counts.all > 0 ? Math.round((counts.done / counts.all) * 100) : 0;
 
+      // Safety guard: if user navigated away while fetching async data, abort
+      if (appStore.getState().activeSection !== 'development') {
+        return;
+      }
+
       container.innerHTML = `
         <div class="dev-container">
           <!-- Main Hero Header -->

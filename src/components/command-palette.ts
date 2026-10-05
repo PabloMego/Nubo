@@ -143,16 +143,12 @@ export class CommandPalette {
     if (item.type === 'project') {
       const proj = state.projects.find(p => p.id === item.projectId);
       if (proj) {
-        appStore.setCurrentProject(proj);
-        appStore.setActiveSection('overview');
+        appStore.selectProject(proj, 'overview');
       }
     } else if (item.projectId) {
       const proj = state.projects.find(p => p.id === item.projectId);
       if (proj) {
-        appStore.setCurrentProject(proj);
-        if (item.actionPayload?.section) {
-          appStore.setActiveSection(item.actionPayload.section);
-        }
+        appStore.selectProject(proj, item.actionPayload?.section || 'overview');
       }
     }
   }

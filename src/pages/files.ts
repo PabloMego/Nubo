@@ -37,6 +37,11 @@ export class FilesPage {
     const relativePath = FilesPage.currentDirectory.replace(project.folder_path, '').replace(/^[\\/]/, '');
     const crumbs = relativePath ? relativePath.split(/[\\/]/) : [];
 
+    // Safety guard: if user navigated away while fetching async data, abort
+    if (appStore.getState().activeSection !== 'files') {
+      return;
+    }
+
     container.innerHTML = `
       <div class="app-page-hero">
         <div class="page-hero-left">

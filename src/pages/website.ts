@@ -134,6 +134,11 @@ export class WebsitePageView {
     };
     const completionRate = counts.all > 0 ? Math.round((counts.done / counts.all) * 100) : 0;
 
+    // Safety guard: if user navigated away while fetching async data, abort
+    if (appStore.getState().activeSection !== 'website') {
+      return;
+    }
+
     container.innerHTML = `
       <div class="web-container">
         <!-- Main Hero Header -->

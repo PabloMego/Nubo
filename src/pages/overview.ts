@@ -32,6 +32,11 @@ export class OverviewPage {
       window.nubo.projects.getActivities(project.id)
     ]);
 
+    // Safety guard: if user navigated away from overview while fetching async data, abort
+    if (appStore.getState().activeSection !== 'overview') {
+      return;
+    }
+
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter((t: Task) => t.status === 'done').length;
     const pendingTasks = tasks.filter((t: Task) => t.status !== 'done').slice(0, 5);

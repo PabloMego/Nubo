@@ -55,10 +55,10 @@ export class Sidebar {
           </button>
         ` : ''}
 
-        <!-- Current Project Section Navigation (only when a project is selected and not in home) -->
+        <!-- Current Project Section Navigation (only when a project is selected and not in home or settings) -->
         ${currentProj && activeSec !== 'home' ? `
           <div class="sidebar-section">
-            <div class="sidebar-active-proj-header" title="${currentProj.name}">
+            <div class="sidebar-active-proj-header" id="btn-sidebar-active-proj" style="cursor: pointer;" title="${currentProj.name}">
               ${currentProj.logo ? `
                 <img src="${currentProj.logo}" class="sidebar-active-proj-logo" alt="${currentProj.name}" />
               ` : `
@@ -79,7 +79,7 @@ export class Sidebar {
         <div class="sidebar-section">
           <div class="sidebar-section-title">${t('nav.projects')}</div>
           ${state.projects.map(p => {
-            const isSelected = currentProj?.id === p.id && activeSec !== 'home';
+            const isSelected = currentProj?.id === p.id && activeSec !== 'home' && activeSec !== 'settings';
             return `
               <div class="project-nav-item ${isSelected ? 'active' : ''}" data-project-id="${p.id}" title="${p.name}">
                 <div class="project-icon-badge" style="border-left: 2px solid ${p.color || '#111111'};">
@@ -129,6 +129,11 @@ export class Sidebar {
       modalManager.openNewProjectModal();
     });
 
+    // Active project header click -> Overview
+    this.container.querySelector('#btn-sidebar-active-proj')?.addEventListener('click', () => {
+      appStore.setActiveSection('overview');
+    });
+
     // Project sub-sections navigation
     const secItems = this.container.querySelectorAll('.nav-item[data-section]');
     secItems.forEach(item => {
@@ -145,8 +150,7 @@ export class Sidebar {
         const id = item.getAttribute('data-project-id');
         const proj = appStore.getState().projects.find(p => p.id === id);
         if (proj) {
-          appStore.setCurrentProject(proj);
-          appStore.setActiveSection('overview');
+          appStore.selectProject(proj, 'overview');
         }
       });
     });

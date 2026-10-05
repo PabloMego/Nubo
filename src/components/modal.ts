@@ -192,8 +192,7 @@ export class ModalManager {
 
         const all = await window.nubo.projects.getAll();
         appStore.setProjects(all);
-        appStore.setCurrentProject(project);
-        appStore.setActiveSection('overview');
+        appStore.selectProject(project, 'overview');
 
         if (onCreated) onCreated();
       } catch (err: any) {

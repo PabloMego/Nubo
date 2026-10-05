@@ -14,6 +14,7 @@ import { SettingsPage } from '../pages/settings';
 export class NavigationRouter {
   private viewContainer: HTMLElement;
   private lastProjectId: string | null = null;
+  private currentRenderToken: number = 0;
 
   constructor(viewContainer: HTMLElement) {
     this.viewContainer = viewContainer;
@@ -29,48 +30,63 @@ export class NavigationRouter {
     });
   }
 
-  public route(section: AppSection): void {
+  public async route(section: AppSection): Promise<void> {
+    const token = ++this.currentRenderToken;
     this.viewContainer.scrollTop = 0;
+
+    // Fast check: if the active section already changed, abort early
+    if (appStore.getState().activeSection !== section) {
+      return;
+    }
 
     switch (section) {
       case 'home':
-        HomePage.render(this.viewContainer);
+        await HomePage.render(this.viewContainer);
         break;
       case 'overview':
-        OverviewPage.render(this.viewContainer);
+        await OverviewPage.render(this.viewContainer);
         break;
       case 'guide':
-        GuidePage.render(this.viewContainer);
+        await GuidePage.render(this.viewContainer);
         break;
       case 'files':
-        FilesPage.render(this.viewContainer);
+        await FilesPage.render(this.viewContainer);
         break;
       case 'brand':
-        BrandPage.render(this.viewContainer);
+        await BrandPage.render(this.viewContainer);
         break;
       case 'website':
-        WebsitePageView.render(this.viewContainer);
+        await WebsitePageView.render(this.viewContainer);
         break;
       case 'development':
-        DevelopmentPage.render(this.viewContainer);
+        await DevelopmentPage.render(this.viewContainer);
         break;
       case 'marketing':
         MarketingPage.setActiveTab('campaigns');
-        MarketingPage.render(this.viewContainer);
+        await MarketingPage.render(this.viewContainer);
         break;
       case 'content':
         MarketingPage.setActiveTab('content');
-        MarketingPage.render(this.viewContainer);
+        await MarketingPage.render(this.viewContainer);
         break;
       case 'notes':
-        NotesPage.render(this.viewContainer);
+        await NotesPage.render(this.viewContainer);
         break;
       case 'settings':
-        SettingsPage.render(this.viewContainer);
+        await SettingsPage.render(this.viewContainer);
         break;
       default:
-        HomePage.render(this.viewContainer);
+        await HomePage.render(this.viewContainer);
         break;
+    }
+
+    // If another route was triggered while this page was rendering async,
+    // ensure the active section matches what is rendered on screen
+    if (token !== this.currentRenderToken) {
+      const latestSection = appStore.getState().activeSection;
+      if (latestSection !== section) {
+        this.route(latestSection);
+      }
     }
   }
 }

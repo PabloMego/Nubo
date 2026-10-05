@@ -25,6 +25,11 @@ export class NotesPage {
 
     const activeNote = notes.find(n => n.id === NotesPage.selectedNoteId) || (filteredNotes.length > 0 ? filteredNotes[0] : null);
 
+    // Safety guard: if user navigated away while fetching async data, abort
+    if (appStore.getState().activeSection !== 'notes') {
+      return;
+    }
+
     container.innerHTML = `
       <div class="app-page-hero">
         <div class="page-hero-left">

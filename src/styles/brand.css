@@ -379,6 +379,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   transition: all var(--transition-fast);
+  position: relative;
 }
 
 .color-row-item:hover {
@@ -386,6 +387,10 @@
 }
 
 .color-preview-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 24px;
   height: 24px;
   border-radius: var(--radius-xs);
@@ -393,6 +398,36 @@
   cursor: pointer;
   flex-shrink: 0;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.color-preview-trigger .color-hidden-picker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.color-preview-trigger .color-hidden-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+  margin: 0;
+}
+
+.color-preview-trigger .color-hidden-picker::-webkit-color-swatch {
+  border: none;
 }
 
 .color-name-input {

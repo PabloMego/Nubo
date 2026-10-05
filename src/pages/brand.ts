@@ -1626,16 +1626,8 @@ export class BrandPage {
       });
     });
 
-    container.querySelectorAll('.color-preview-trigger').forEach(swatch => {
-      swatch.addEventListener('click', () => {
-        const id = swatch.getAttribute('data-id');
-        const picker = container.querySelector(`.color-hidden-picker[data-id="${id}"]`) as HTMLInputElement;
-        picker?.click();
-      });
-    });
-
     container.querySelectorAll('.color-hidden-picker').forEach(picker => {
-      picker.addEventListener('input', async (e) => {
+      const handleColorUpdate = async (e: Event) => {
         const id = picker.getAttribute('data-id');
         const hex = (e.target as HTMLInputElement).value;
         const colorItem = colors.find(c => c.id === id);
@@ -1643,13 +1635,16 @@ export class BrandPage {
           colorItem.hex = hex;
           const swatch = container.querySelector(`.color-preview-trigger[data-id="${id}"]`) as HTMLElement;
           if (swatch) swatch.style.backgroundColor = hex;
+
+          const hexInput = container.querySelector(`.color-hex-input[data-id="${id}"]`) as HTMLInputElement;
+          if (hexInput) hexInput.value = hex;
+
           const hexBtn = container.querySelector(`.color-hex-btn[data-id="${id}"]`) as HTMLElement;
           if (hexBtn) {
-            hexBtn.textContent = hex;
             hexBtn.setAttribute('data-hex', hex);
           }
 
-          // Also update base project brand colors if this is the primary color
+          // Also update base project brand colors if this is the primary, secondary or accent color
           const updateData: any = { colors_json: JSON.stringify(colors) };
           if (colorItem.category === 'primary') updateData.primary_color = hex;
           if (colorItem.category === 'secondary') updateData.secondary_color = hex;
@@ -1657,7 +1652,10 @@ export class BrandPage {
 
           await window.nubo.brand.update(project.id, updateData);
         }
-      });
+      };
+
+      picker.addEventListener('input', handleColorUpdate);
+      picker.addEventListener('change', handleColorUpdate);
     });
 
     container.querySelectorAll('.color-hex-input').forEach(input => {
@@ -1665,7 +1663,10 @@ export class BrandPage {
         const id = input.getAttribute('data-id');
         let hex = (e.target as HTMLInputElement).value.trim();
         if (!hex.startsWith('#')) hex = '#' + hex;
-        if (!/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(hex)) {
+        if (hex.length === 4 && /^#[0-9A-Fa-f]{3}$/.test(hex)) {
+          hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
           showToast(getLanguage() === 'es' ? 'Código HEX no válido' : 'Invalid HEX code', 'error');
           return;
         }
@@ -2213,8 +2214,9 @@ export class BrandPage {
   private static renderColorRow(c: BrandColorItem): string {
     return `
       <div class="color-row-item">
-        <input type="color" class="color-hidden-picker" data-id="${c.id}" value="${c.hex}" style="opacity: 0; width: 0; height: 0; position: absolute; pointer-events: none;" />
-        <div class="color-preview-trigger" data-id="${c.id}" style="background-color: ${c.hex};" title="Click to open color picker"></div>
+        <label class="color-preview-trigger" data-id="${c.id}" style="background-color: ${c.hex};" title="Click para elegir color">
+          <input type="color" class="color-hidden-picker" data-id="${c.id}" value="${c.hex}" />
+        </label>
         <input type="text" class="color-name-input" data-id="${c.id}" value="${c.name}" spellcheck="false" title="Color name" />
         <input type="text" class="color-hex-input" data-id="${c.id}" value="${c.hex}" maxlength="7" spellcheck="false" title="Edit HEX code" />
         <button class="color-hex-btn" data-id="${c.id}" data-hex="${c.hex}" title="Click to copy HEX">

@@ -247,10 +247,45 @@ export class BrandPage {
       const synchedLogo = brand.favicon || brand.primary_logo;
       try {
         await window.nubo.projects.update(project.id, { logo: synchedLogo });
+        project.logo = synchedLogo;
         const allProjs = await window.nubo.projects.getAll();
         appStore.setProjects(allProjs);
+        const currP = appStore.getState().currentProject;
+        if (currP && currP.id === project.id) {
+          currP.logo = synchedLogo;
+        }
       } catch (err) {
         console.warn('Failed auto-syncing project logo:', err);
+      }
+    }
+
+    // Auto-clean orphaned project logo and disk files if brand has no logos left
+    if (project.logo && !brand.favicon && !brand.primary_logo && !brand.alternative_logo) {
+      try {
+        await window.nubo.projects.update(project.id, { logo: null });
+        project.logo = null;
+        const allProjs = await window.nubo.projects.getAll();
+        appStore.setProjects(allProjs);
+        const currP = appStore.getState().currentProject;
+        if (currP && currP.id === project.id) {
+          currP.logo = null;
+        }
+      } catch (err) {
+        console.warn('Failed auto-cleaning orphaned project logo:', err);
+      }
+
+      // Also clean up any leftover files in Brand/Logos if no logos are defined
+      if (logosDir && window.nubo?.files?.listFiles && window.nubo?.files?.deleteItem) {
+        try {
+          const logoFiles = await window.nubo.files.listFiles(logosDir, project.folder_path, false);
+          for (const f of logoFiles) {
+            if (!f.isDirectory) {
+              await window.nubo.files.deleteItem(f.path);
+            }
+          }
+        } catch (err) {
+          console.warn('Failed cleaning orphaned files in Brand/Logos:', err);
+        }
       }
     }
 
@@ -1429,6 +1464,15 @@ export class BrandPage {
             }
           }
 
+          const oldPath = (brand as any)[`${key}_path`];
+          if (oldPath && oldPath !== savedPath && window.nubo?.files?.deleteItem) {
+            try {
+              await window.nubo.files.deleteItem(oldPath);
+            } catch (delErr) {
+              console.warn('[BrandPage] Error deleting old asset file:', delErr);
+            }
+          }
+
           try {
             const base64Res = await window.nubo.files.readFileBase64(savedPath);
             if (base64Res && base64Res.base64) {
@@ -1439,11 +1483,16 @@ export class BrandPage {
               (brand as any)[key] = base64Res.base64;
               (brand as any)[`${key}_path`] = savedPath;
 
-              // CRITICAL: When favicon is uploaded, sync to project logo so "Mis Proyectos" displays it!
-              if (key === 'favicon') {
+              // When favicon or primary_logo is uploaded, sync to project logo so "Mis Proyectos" & sidebar display it!
+              if (key === 'favicon' || key === 'primary_logo') {
                 await window.nubo.projects.update(project.id, { logo: base64Res.base64 });
+                project.logo = base64Res.base64;
                 const allProjs = await window.nubo.projects.getAll();
                 appStore.setProjects(allProjs);
+                const currP = appStore.getState().currentProject;
+                if (currP && currP.id === project.id) {
+                  currP.logo = base64Res.base64;
+                }
               }
 
               showToast(t('brand.toastSaved'));
@@ -1461,9 +1510,18 @@ export class BrandPage {
     container.querySelectorAll('.btn-logo-remove').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        const key = btn.getAttribute('data-key');
+        const key = btn.getAttribute('data-key') as 'primary_logo' | 'alternative_logo' | 'favicon' | 'banner';
         if (!key) return;
         try {
+          const filePath = (brand as any)[`${key}_path`];
+          if (filePath && window.nubo?.files?.deleteItem) {
+            try {
+              await window.nubo.files.deleteItem(filePath);
+            } catch (fileErr) {
+              console.warn('[BrandPage] Error deleting file from disk:', fileErr);
+            }
+          }
+
           const updateObj: any = {};
           updateObj[key] = null;
           updateObj[`${key}_path`] = null;
@@ -1471,11 +1529,16 @@ export class BrandPage {
           (brand as any)[key] = null;
           (brand as any)[`${key}_path`] = null;
 
-          // CRITICAL: When favicon is removed, clear project logo
-          if (key === 'favicon') {
-            await window.nubo.projects.update(project.id, { logo: null });
-            const allProjs = await window.nubo.projects.getAll();
-            appStore.setProjects(allProjs);
+          // CRITICAL: When any logo is removed, update project logo accordingly
+          // If favicon or primary_logo remains, use that. Otherwise, clear project logo completely!
+          const remainingLogo = brand.favicon || brand.primary_logo || null;
+          await window.nubo.projects.update(project.id, { logo: remainingLogo });
+          project.logo = remainingLogo;
+          const allProjs = await window.nubo.projects.getAll();
+          appStore.setProjects(allProjs);
+          const currP = appStore.getState().currentProject;
+          if (currP && currP.id === project.id) {
+            currP.logo = remainingLogo;
           }
 
           showToast(t('brand.toastSaved'));
@@ -1623,6 +1686,14 @@ export class BrandPage {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const idx = Number(btn.getAttribute('data-idx'));
+        const g = graphics[idx];
+        if (g && g.path && window.nubo?.files?.deleteItem) {
+          try {
+            await window.nubo.files.deleteItem(g.path);
+          } catch (fileErr) {
+            console.warn('[BrandPage] Error deleting graphic file from disk:', fileErr);
+          }
+        }
         graphics.splice(idx, 1);
         await window.nubo.brand.update(project.id, {
           graphics_json: JSON.stringify(graphics)
@@ -1720,10 +1791,20 @@ export class BrandPage {
     });
 
     container.querySelector('#btn-pdf-remove')?.addEventListener('click', async () => {
+      const pdfPath = brand.brand_manual_path;
+      if (pdfPath && window.nubo?.files?.deleteItem) {
+        try {
+          await window.nubo.files.deleteItem(pdfPath);
+        } catch (fileErr) {
+          console.warn('[BrandPage] Error deleting manual PDF file from disk:', fileErr);
+        }
+      }
       await window.nubo.brand.update(project.id, {
         brand_manual_pdf: null,
         brand_manual_path: null
       });
+      brand.brand_manual_pdf = undefined;
+      brand.brand_manual_path = undefined;
       showToast(t('brand.toastSaved'));
       BrandPage.render(container);
     });
@@ -2315,6 +2396,74 @@ export class BrandPage {
         const path = btn.getAttribute('data-path');
         if (path && confirm(getLanguage() === 'es' ? '¿Eliminar este archivo?' : 'Delete this file?')) {
           await window.nubo.files.deleteItem(path);
+
+          // Check if this file was linked to any brand asset
+          const updateObj: any = {};
+          let brandChanged = false;
+          let logoChanged = false;
+
+          if (brand.primary_logo_path === path) {
+            brand.primary_logo = null;
+            brand.primary_logo_path = null;
+            updateObj.primary_logo = null;
+            updateObj.primary_logo_path = null;
+            brandChanged = true;
+            logoChanged = true;
+          }
+          if (brand.alternative_logo_path === path) {
+            brand.alternative_logo = null;
+            brand.alternative_logo_path = null;
+            updateObj.alternative_logo = null;
+            updateObj.alternative_logo_path = null;
+            brandChanged = true;
+            logoChanged = true;
+          }
+          if (brand.favicon_path === path) {
+            brand.favicon = null;
+            brand.favicon_path = null;
+            updateObj.favicon = null;
+            updateObj.favicon_path = null;
+            brandChanged = true;
+            logoChanged = true;
+          }
+          if (brand.banner_path === path) {
+            brand.banner = null;
+            brand.banner_path = null;
+            updateObj.banner = null;
+            updateObj.banner_path = null;
+            brandChanged = true;
+          }
+          if (brand.brand_manual_path === path) {
+            brand.brand_manual_pdf = undefined;
+            brand.brand_manual_path = undefined;
+            updateObj.brand_manual_pdf = null;
+            updateObj.brand_manual_path = null;
+            brandChanged = true;
+          }
+
+          const gIdx = graphics.findIndex(g => g.path === path);
+          if (gIdx >= 0) {
+            graphics.splice(gIdx, 1);
+            updateObj.graphics_json = JSON.stringify(graphics);
+            brandChanged = true;
+          }
+
+          if (brandChanged) {
+            await window.nubo.brand.update(project.id, updateObj);
+          }
+
+          if (logoChanged) {
+            const remainingLogo = brand.favicon || brand.primary_logo || null;
+            await window.nubo.projects.update(project.id, { logo: remainingLogo });
+            project.logo = remainingLogo;
+            const allProjs = await window.nubo.projects.getAll();
+            appStore.setProjects(allProjs);
+            const currP = appStore.getState().currentProject;
+            if (currP && currP.id === project.id) {
+              currP.logo = remainingLogo;
+            }
+          }
+
           BrandPage.render(container);
         }
       });

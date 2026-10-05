@@ -22,6 +22,8 @@
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-md);
   scrollbar-width: none;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .mkt-subnav-bar::-webkit-scrollbar {

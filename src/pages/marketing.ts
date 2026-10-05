@@ -12,7 +12,7 @@ import {
 import { t, getLanguage } from '../scripts/i18n';
 
 export class MarketingPage {
-  private static topTab: 'campaigns' | 'accounts' = 'campaigns';
+  private static topTab: 'campaigns' | 'tasks' | 'accounts' = 'campaigns';
   private static selectedCampaignId: string | null = null;
   private static viewMode: 'list' | 'detail' = 'list';
   private static contentSubView: 'kanban' | 'calendar' = 'kanban';
@@ -20,12 +20,22 @@ export class MarketingPage {
   private static platformFilter: string = 'all';
   private static draggedContentId: string | null = null;
 
-  public static setActiveTab(tab: 'content' | 'overview' | 'campaigns' | 'launch' | 'accounts'): void {
+  // Task-specific state
+  private static onlyMarketingTasks: boolean = false;
+  private static taskSearchQuery: string = '';
+  private static taskFilterPriority: string = 'all';
+  private static taskFilterCampaign: string = 'all';
+  private static activeQuickAddCol: 'todo' | 'in_progress' | 'done' | null = null;
+  private static draggedTaskId: string | null = null;
+
+  public static setActiveTab(tab: 'content' | 'overview' | 'campaigns' | 'launch' | 'accounts' | 'tasks'): void {
     if (tab === 'content') {
       MarketingPage.topTab = 'campaigns';
       MarketingPage.viewMode = 'detail';
     } else if (tab === 'accounts') {
       MarketingPage.topTab = 'accounts';
+    } else if (tab === 'tasks') {
+      MarketingPage.topTab = 'tasks';
     } else {
       MarketingPage.topTab = 'campaigns';
       MarketingPage.viewMode = 'list';
@@ -80,6 +90,31 @@ export class MarketingPage {
     const currentCampaign = campaigns.find(c => c.id === MarketingPage.selectedCampaignId);
     const readyAccountsCount = accounts.filter(a => ['Active', 'Created'].includes(a.status)).length;
 
+    // Filter marketing / campaign tasks
+    const mktTasks = allTasks.filter(task => {
+      if (!MarketingPage.onlyMarketingTasks) return true;
+      if (task.campaign_id) return true;
+      if (task.type === 'launch') return true;
+      const tags = Array.isArray(task.tags) ? task.tags.map(t => t.toLowerCase()) : [];
+      const title = (task.title || '').toLowerCase();
+      const desc = (task.description || '').toLowerCase();
+      const mktKeywords = [
+        'marketing', 'campaña', 'campaign', 'video', 'redes', 'social', 
+        'tiktok', 'youtube', 'instagram', 'twitter', 'x', 'post', 
+        'contenido', 'content', 'lanzamiento', 'launch', 'ads', 'anuncio', 
+        'promo', 'email', 'newsletter', 'audiencia', 'guion', 'script'
+      ];
+      return mktKeywords.some(kw => tags.includes(kw) || title.includes(kw) || desc.includes(kw));
+    });
+
+    const mktTaskCounts = {
+      all: mktTasks.length,
+      todo: mktTasks.filter(t => t.status === 'todo').length,
+      in_progress: mktTasks.filter(t => t.status === 'in_progress').length,
+      done: mktTasks.filter(t => t.status === 'done').length
+    };
+    const mktTaskCompletionRate = mktTasks.length > 0 ? Math.round((mktTaskCounts.done / mktTasks.length) * 100) : 0;
+
     // Safety guard: if user navigated away while fetching async data, abort
     if (appStore.getState().activeSection !== 'marketing' && appStore.getState().activeSection !== 'content') {
       return;
@@ -120,21 +155,31 @@ export class MarketingPage {
                 ${icons.plus(15)}
                 <span>${isEs ? 'Nueva Campaña' : 'New Campaign'}</span>
               </button>
+            ` : (MarketingPage.topTab === 'tasks' ? `
+              <button class="btn btn-primary" id="btn-hero-add-task">
+                ${icons.plus(15)}
+                <span>${isEs ? 'Nueva Tarea' : 'New Task'}</span>
+              </button>
             ` : `
               <button class="btn btn-primary" id="btn-hero-add-account">
                 ${icons.plus(15)}
                 <span>${isEs ? 'Añadir Cuenta / Red' : 'Add Account'}</span>
               </button>
-            `}
+            `)}
           </div>
         </div>
 
-        <!-- Section Navigation Tabs: Campañas vs Cuentas y Redes Oficiales -->
+        <!-- Section Navigation Tabs: Campañas vs Tareas vs Cuentas y Redes Oficiales -->
         <div class="mkt-subnav-bar">
           <button class="mkt-subnav-tab ${MarketingPage.topTab === 'campaigns' ? 'active' : ''}" data-mkt-tab="campaigns">
             ${icons.target(15)}
             <span>${isEs ? 'Campañas' : 'Campaigns'}</span>
             <span class="mkt-tab-count-badge">${campaigns.length}</span>
+          </button>
+          <button class="mkt-subnav-tab ${MarketingPage.topTab === 'tasks' ? 'active' : ''}" data-mkt-tab="tasks">
+            ${icons.columns(15)}
+            <span>${isEs ? 'Tareas' : 'Tasks'}</span>
+            <span class="mkt-tab-count-badge">${mktTasks.length}</span>
           </button>
           <button class="mkt-subnav-tab ${MarketingPage.topTab === 'accounts' ? 'active' : ''}" data-mkt-tab="accounts">
             ${icons.users(15)}
@@ -152,6 +197,8 @@ export class MarketingPage {
     if (mainViewContainer) {
       if (MarketingPage.topTab === 'accounts') {
         MarketingPage.renderProjectAccountsView(mainViewContainer, project.id, accounts, emails, isEs);
+      } else if (MarketingPage.topTab === 'tasks') {
+        MarketingPage.renderTasksView(mainViewContainer, project.id, campaigns, mktTasks, mktTaskCounts, mktTaskCompletionRate, isEs);
       } else {
         if (campaigns.length === 0 || MarketingPage.viewMode === 'list') {
           MarketingPage.renderCampaignsListView(mainViewContainer, project.id, campaigns, allContent, allTasks, isEs);
@@ -163,7 +210,7 @@ export class MarketingPage {
       }
     }
 
-    MarketingPage.attachGlobalListeners(container, project, campaigns);
+    MarketingPage.attachGlobalListeners(container, project, campaigns, mktTasks);
   }
 
   // ==========================================================================
@@ -231,6 +278,11 @@ export class MarketingPage {
 
             <div style="display: flex; align-items: center; gap: 16px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap;">
               <div>🎬 <strong>${publishedCount} / ${cmpContent.length}</strong> ${isEs ? 'vídeos' : 'videos'}</div>
+              <div>✓ <strong>${tasksDoneCount} / ${cmpTasks.length}</strong> ${isEs ? 'tareas' : 'tasks'}</div>
+              <button class="btn btn-secondary btn-sm" id="btn-view-campaign-tasks" style="padding: 2px 8px; font-size: 11px;">
+                ${icons.columns(12)}
+                <span>${isEs ? 'Ver Tareas' : 'View Tasks'}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -249,6 +301,12 @@ export class MarketingPage {
     // Handlers
     container.querySelector('#btn-back-to-campaigns-list')?.addEventListener('click', () => {
       MarketingPage.viewMode = 'list';
+      MarketingPage.render(document.querySelector('.view-container')!);
+    });
+
+    container.querySelector('#btn-view-campaign-tasks')?.addEventListener('click', () => {
+      MarketingPage.topTab = 'tasks';
+      MarketingPage.taskFilterCampaign = campaign.id;
       MarketingPage.render(document.querySelector('.view-container')!);
     });
 
@@ -951,6 +1009,7 @@ export class MarketingPage {
 
                     <div style="display: flex; gap: 12px; margin-top: 14px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap;">
                       <span title="${isEs ? 'Vídeos planificados' : 'Videos'}">🎬 <strong>${published} / ${cmpContent.length}</strong> ${isEs ? 'vídeos' : 'videos'}</span>
+                      <span title="${isEs ? 'Tareas vinculadas' : 'Tasks'}">✓ <strong>${allTasks.filter(t => t.campaign_id === cmp.id && t.status === 'done').length} / ${allTasks.filter(t => t.campaign_id === cmp.id).length}</strong> ${isEs ? 'tareas' : 'tasks'}</span>
                     </div>
                   </div>
 
@@ -1053,10 +1112,15 @@ export class MarketingPage {
   // ==========================================================================
   // ATTACH LISTENERS
   // ==========================================================================
-  private static attachGlobalListeners(container: HTMLElement, project: any, allCampaigns: MarketingCampaign[]): void {
+  private static attachGlobalListeners(
+    container: HTMLElement, 
+    project: any, 
+    allCampaigns: MarketingCampaign[],
+    tasks: Task[]
+  ): void {
     container.querySelectorAll('.mkt-subnav-tab').forEach(tabBtn => {
       tabBtn.addEventListener('click', () => {
-        const tab = tabBtn.getAttribute('data-mkt-tab') as 'campaigns' | 'accounts';
+        const tab = tabBtn.getAttribute('data-mkt-tab') as 'campaigns' | 'tasks' | 'accounts';
         if (tab) {
           MarketingPage.topTab = tab;
           if (tab === 'campaigns') {
@@ -1071,6 +1135,12 @@ export class MarketingPage {
       MarketingPage.topTab = 'campaigns';
       MarketingPage.viewMode = 'list';
       MarketingPage.render(container);
+    });
+
+    container.querySelector('#btn-hero-add-task')?.addEventListener('click', () => {
+      modalManager.openNewTaskModal(project.id, 'todo', () => {
+        MarketingPage.render(container);
+      });
     });
 
     container.querySelector('#btn-hero-add-account')?.addEventListener('click', () => {
@@ -1953,6 +2023,450 @@ export class MarketingPage {
       modalManager.close();
       showToast(isEs ? 'Campaña guardada.' : 'Campaign saved.');
       if (onSaved) onSaved();
+    });
+  }
+
+  // ==========================================================================
+  // MARKETING & CAMPAIGNS TASKS KANBAN VIEW
+  // ==========================================================================
+  private static renderTasksView(
+    container: HTMLElement,
+    projectId: string,
+    campaigns: MarketingCampaign[],
+    tasks: Task[],
+    counts: { all: number; todo: number; in_progress: number; done: number },
+    completionRate: number,
+    isEs: boolean
+  ): void {
+    const query = (MarketingPage.taskSearchQuery || '').trim().toLowerCase();
+    const priority = MarketingPage.taskFilterPriority;
+    const cmpFilter = MarketingPage.taskFilterCampaign;
+
+    const filteredTasks = tasks.filter(task => {
+      if (priority !== 'all' && task.priority !== priority) return false;
+      if (cmpFilter !== 'all' && task.campaign_id !== cmpFilter) return false;
+      if (query) {
+        const matchesTitle = (task.title || '').toLowerCase().includes(query);
+        const matchesDesc = (task.description || '').toLowerCase().includes(query);
+        const matchesTags = Array.isArray(task.tags) && task.tags.some(t => t.toLowerCase().includes(query));
+        if (!matchesTitle && !matchesDesc && !matchesTags) return false;
+      }
+      return true;
+    });
+
+    const columns: Array<{ id: 'todo' | 'in_progress' | 'done'; title: string; color: string }> = [
+      { id: 'todo', title: isEs ? 'Por hacer' : 'To Do', color: '#64748B' },
+      { id: 'in_progress', title: isEs ? 'En progreso' : 'In Progress', color: '#F59E0B' },
+      { id: 'done', title: isEs ? 'Completadas' : 'Done', color: '#10B981' }
+    ];
+
+    container.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+        <!-- Tasks Header & Quick Stats -->
+        <div class="mkt-view-header">
+          <div class="mkt-view-title-group">
+            <h2>${isEs ? 'Tareas de Campañas y Marketing' : 'Marketing & Campaign Tasks'}</h2>
+            <p>${isEs ? 'Organiza y haz seguimiento a las tareas operativas, lanzamientos y acciones de difusión de tus campañas.' : 'Track operational tasks, launches, and promotional actions for your campaigns.'}</p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-primary btn-sm" id="btn-mkt-add-task">
+              ${icons.plus(13)}
+              <span>${isEs ? 'Añadir Tarea' : 'Add Task'}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Task Count Pills & Progress Bar -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <div class="dev-task-pills-row" style="margin-bottom: 0;">
+            <div class="dev-task-pill" id="mkt-pill-todo" style="cursor: pointer;" title="${isEs ? 'Filtrar por hacer' : 'Filter todo'}">
+              <span class="task-dot todo"></span>
+              <span class="task-pill-count">${counts.todo}</span>
+              <span class="task-pill-name">${isEs ? 'Por hacer' : 'To do'}</span>
+            </div>
+            <div class="dev-task-pill" id="mkt-pill-in-progress" style="cursor: pointer;" title="${isEs ? 'Filtrar en progreso' : 'Filter in progress'}">
+              <span class="task-dot in_progress"></span>
+              <span class="task-pill-count">${counts.in_progress}</span>
+              <span class="task-pill-name">${isEs ? 'En progreso' : 'In progress'}</span>
+            </div>
+            <div class="dev-task-pill" id="mkt-pill-done" style="cursor: pointer;" title="${isEs ? 'Filtrar completadas' : 'Filter done'}">
+              <span class="task-dot done"></span>
+              <span class="task-pill-count">${counts.done}</span>
+              <span class="task-pill-name">${isEs ? 'Completadas' : 'Done'}</span>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-secondary);">
+            <span>${isEs ? 'Progreso:' : 'Progress:'} <strong>${completionRate}%</strong></span>
+            <div style="width: 90px; height: 6px; background: var(--bg-surface-elevated); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-subtle);">
+              <div style="width: ${completionRate}%; height: 100%; background: var(--status-success); border-radius: 999px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar: Search, Priority, Campaign & Scope -->
+        <div class="dev-toolbar">
+          <div class="dev-toolbar-left" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="dev-search-box">
+              <span class="dev-search-icon">${icons.search(14)}</span>
+              <input 
+                type="text" 
+                class="dev-search-input" 
+                id="mkt-task-search-input" 
+                placeholder="${isEs ? 'Buscar tareas de campañas...' : 'Search campaign tasks...'}" 
+                value="${MarketingPage.taskSearchQuery}"
+              />
+              ${MarketingPage.taskSearchQuery ? `
+                <button class="dev-search-clear" id="mkt-task-search-clear" title="Clear">
+                  ${icons.close ? icons.close(13) : '✕'}
+                </button>
+              ` : ''}
+            </div>
+
+            <div class="dev-filter-group">
+              <select class="dev-filter-select ${MarketingPage.taskFilterPriority !== 'all' ? 'active' : ''}" id="mkt-task-filter-priority">
+                <option value="all">${isEs ? 'Prioridad: Todas' : 'Priority: All'}</option>
+                <option value="urgent" ${MarketingPage.taskFilterPriority === 'urgent' ? 'selected' : ''}>🔴 ${isEs ? 'Urgente' : 'Urgent'}</option>
+                <option value="high" ${MarketingPage.taskFilterPriority === 'high' ? 'selected' : ''}>🟠 ${isEs ? 'Alta' : 'High'}</option>
+                <option value="medium" ${MarketingPage.taskFilterPriority === 'medium' ? 'selected' : ''}>🟡 ${isEs ? 'Media' : 'Medium'}</option>
+                <option value="low" ${MarketingPage.taskFilterPriority === 'low' ? 'selected' : ''}>⚪ ${isEs ? 'Baja' : 'Low'}</option>
+              </select>
+            </div>
+
+            ${campaigns.length > 0 ? `
+              <div class="dev-filter-group">
+                <select class="dev-filter-select ${MarketingPage.taskFilterCampaign !== 'all' ? 'active' : ''}" id="mkt-task-filter-campaign">
+                  <option value="all">${isEs ? 'Todas las campañas' : 'All campaigns'}</option>
+                  ${campaigns.map(c => `
+                    <option value="${c.id}" ${MarketingPage.taskFilterCampaign === c.id ? 'selected' : ''}>🎯 ${c.name}</option>
+                  `).join('')}
+                </select>
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-toggle-mkt-task-scope">
+              ${MarketingPage.onlyMarketingTasks ? (isEs ? 'Mostrar todas las tareas' : 'Show all tasks') : (isEs ? 'Solo tareas de marketing' : 'Marketing tasks only')}
+            </button>
+          </div>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="dev-kanban-board">
+          ${columns.map(col => {
+            const colTasks = filteredTasks.filter(item => item.status === col.id);
+            const isQuickAddActive = MarketingPage.activeQuickAddCol === col.id;
+
+            return `
+              <div class="kanban-column" data-status="${col.id}">
+                <div class="kanban-column-header">
+                  <div class="kanban-column-title-group">
+                    <span class="kanban-column-indicator"></span>
+                    <span class="kanban-column-title">${col.title}</span>
+                    <span class="kanban-column-count">${colTasks.length}</span>
+                  </div>
+                  <button class="kanban-btn-add-column btn-mkt-add-task-col" data-col="${col.id}" title="${isEs ? 'Añadir tarea aquí' : 'Add task here'}">
+                    ${icons.plus(14)}
+                  </button>
+                </div>
+
+                <div class="kanban-column-body" data-status="${col.id}">
+                  ${colTasks.length === 0 ? `
+                    <div class="kanban-empty-state">
+                      ${icons.columns ? icons.columns(28) : icons.target(28)}
+                      <p>${isEs ? 'No hay tareas en esta columna' : 'No tasks in this column'}</p>
+                      <button class="btn-add-inline-task btn-mkt-quick-add-col" data-col="${col.id}">
+                        ${isEs ? 'Añadir tarea' : 'Add task'}
+                      </button>
+                    </div>
+                  ` : colTasks.map(task => MarketingPage.renderMarketingKanbanCard(task, campaigns, isEs)).join('')}
+                </div>
+
+                <div class="kanban-column-footer">
+                  ${isQuickAddActive ? `
+                    <div class="kanban-quick-add-form" data-col="${col.id}">
+                      <input 
+                        type="text" 
+                        class="kanban-quick-add-input" 
+                        placeholder="${isEs ? '¿Qué hay que hacer?...' : 'What needs to be done?...'}" 
+                        data-col="${col.id}"
+                        autofocus
+                      />
+                      <div class="kanban-quick-add-actions">
+                        <button class="btn btn-primary btn-sm btn-mkt-submit-quick-add" data-col="${col.id}">
+                          ${icons.plus(12)}
+                          <span>${isEs ? 'Añadir' : 'Add'}</span>
+                        </button>
+                        <button class="btn btn-ghost btn-sm btn-mkt-cancel-quick-add" data-col="${col.id}">
+                          ${isEs ? 'Cancelar' : 'Cancel'}
+                        </button>
+                      </div>
+                    </div>
+                  ` : `
+                    <button class="kanban-btn-quick-add btn-mkt-quick-add-col" data-col="${col.id}">
+                      ${icons.plus(12)}
+                      <span>${isEs ? 'Añadir tarea' : 'Add task'}</span>
+                    </button>
+                  `}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+
+    MarketingPage.attachTaskEvents(container, projectId, campaigns, tasks, isEs);
+  }
+
+  // Render Kanban Card for Marketing
+  private static renderMarketingKanbanCard(task: Task, campaigns: MarketingCampaign[], isEs: boolean): string {
+    const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
+    const checklistTotal = task.checklist ? task.checklist.length : 0;
+    const checklistDone = task.checklist ? task.checklist.filter(i => i.done).length : 0;
+    const linkedCampaign = task.campaign_id ? campaigns.find(c => c.id === task.campaign_id) : null;
+
+    return `
+      <div 
+        class="kanban-card" 
+        data-task-id="${task.id}" 
+        draggable="true"
+      >
+        <div class="kanban-card-top">
+          <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+            <div class="kanban-card-type-tag ${task.type || 'task'}">
+              <span>${task.type || 'task'}</span>
+            </div>
+            ${linkedCampaign ? `
+              <span class="page-stats-badge" style="font-size: 9.5px; padding: 1px 5px; color: var(--accent-primary);" title="${isEs ? 'Campaña vinculada' : 'Linked campaign'}">
+                🎯 ${linkedCampaign.name}
+              </span>
+            ` : ''}
+          </div>
+          <span class="kanban-priority-dot ${task.priority || 'medium'}" title="${task.priority || 'medium'}"></span>
+        </div>
+
+        <div class="kanban-card-title">${task.title}</div>
+
+        ${task.description ? `
+          <div class="kanban-card-desc">${task.description}</div>
+        ` : ''}
+
+        <div class="kanban-card-meta">
+          ${checklistTotal > 0 ? `
+            <div class="kanban-meta-item ${checklistDone === checklistTotal ? 'complete' : ''}">
+              ${icons.check(12)}
+              <span>${checklistDone}/${checklistTotal}</span>
+            </div>
+          ` : ''}
+
+          ${task.due_date ? `
+            <div class="kanban-meta-item ${isOverdue ? 'overdue' : ''}">
+              ${icons.clock(12)}
+              <span>${task.due_date.slice(0, 10)}</span>
+            </div>
+          ` : ''}
+
+          ${Array.isArray(task.tags) && task.tags.length > 0 ? `
+            <div class="kanban-card-tags">
+              ${task.tags.slice(0, 3).map(tag => `
+                <span class="kanban-tag">${tag}</span>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // Attach event handlers for Marketing Kanban Board
+  private static attachTaskEvents(
+    container: HTMLElement,
+    projectId: string,
+    campaigns: MarketingCampaign[],
+    tasks: Task[],
+    isEs: boolean
+  ): void {
+    const openNewTask = (initialCol?: 'todo' | 'in_progress' | 'done') => {
+      modalManager.openNewTaskModal(projectId, initialCol || 'todo', () => {
+        MarketingPage.render(container);
+      });
+    };
+
+    container.querySelector('#btn-mkt-add-task')?.addEventListener('click', () => openNewTask());
+
+    // Task scope toggle
+    container.querySelector('#btn-toggle-mkt-task-scope')?.addEventListener('click', () => {
+      MarketingPage.onlyMarketingTasks = !MarketingPage.onlyMarketingTasks;
+      MarketingPage.render(container);
+    });
+
+    // Task count pills as quick filters
+    container.querySelector('#mkt-pill-todo')?.addEventListener('click', () => {
+      const colEl = container.querySelector('.kanban-column[data-status="todo"]');
+      colEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    container.querySelector('#mkt-pill-in-progress')?.addEventListener('click', () => {
+      const colEl = container.querySelector('.kanban-column[data-status="in_progress"]');
+      colEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+    container.querySelector('#mkt-pill-done')?.addEventListener('click', () => {
+      const colEl = container.querySelector('.kanban-column[data-status="done"]');
+      colEl?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    // Search and filters
+    const searchInput = container.querySelector('#mkt-task-search-input') as HTMLInputElement | null;
+    const prioritySelect = container.querySelector('#mkt-task-filter-priority') as HTMLSelectElement | null;
+    const campaignSelect = container.querySelector('#mkt-task-filter-campaign') as HTMLSelectElement | null;
+    const clearBtn = container.querySelector('#mkt-task-search-clear') as HTMLButtonElement | null;
+
+    searchInput?.addEventListener('input', () => {
+      MarketingPage.taskSearchQuery = searchInput.value;
+      const q = searchInput.value.trim().toLowerCase();
+      const p = prioritySelect?.value || 'all';
+      const c = campaignSelect?.value || 'all';
+
+      container.querySelectorAll<HTMLElement>('.kanban-card').forEach(card => {
+        const taskId = card.getAttribute('data-task-id');
+        const task = tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        let visible = true;
+        if (p !== 'all' && task.priority !== p) visible = false;
+        if (c !== 'all' && task.campaign_id !== c) visible = false;
+        if (q) {
+          const mTitle = (task.title || '').toLowerCase().includes(q);
+          const mDesc = (task.description || '').toLowerCase().includes(q);
+          const mTags = Array.isArray(task.tags) && task.tags.some(t => t.toLowerCase().includes(q));
+          if (!mTitle && !mDesc && !mTags) visible = false;
+        }
+        card.style.display = visible ? '' : 'none';
+      });
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      MarketingPage.taskSearchQuery = '';
+      MarketingPage.render(container);
+    });
+
+    prioritySelect?.addEventListener('change', () => {
+      MarketingPage.taskFilterPriority = prioritySelect.value;
+      MarketingPage.render(container);
+    });
+
+    campaignSelect?.addEventListener('change', () => {
+      MarketingPage.taskFilterCampaign = campaignSelect.value;
+      MarketingPage.render(container);
+    });
+
+    // Quick Add
+    const submitQuickAdd = async (col: 'todo' | 'in_progress' | 'done') => {
+      const input = container.querySelector(`.kanban-quick-add-input[data-col="${col}"]`) as HTMLInputElement | null;
+      const title = input?.value.trim();
+      if (title) {
+        await window.nubo.tasks.create({
+          project_id: projectId,
+          campaign_id: MarketingPage.taskFilterCampaign !== 'all' ? MarketingPage.taskFilterCampaign : (MarketingPage.selectedCampaignId || undefined),
+          title,
+          status: col,
+          priority: 'medium',
+          type: 'task',
+          tags: ['marketing', 'campaña']
+        });
+        showToast(isEs ? 'Tarea creada con éxito' : 'Task created successfully');
+        MarketingPage.activeQuickAddCol = null;
+        MarketingPage.render(container);
+      }
+    };
+
+    container.querySelectorAll('.btn-mkt-add-task-col, .btn-mkt-quick-add-col').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const col = (e.currentTarget as HTMLElement).getAttribute('data-col') as any;
+        MarketingPage.activeQuickAddCol = col;
+        MarketingPage.render(container).then(() => {
+          const quickInput = container.querySelector(`.kanban-quick-add-input[data-col="${col}"]`) as HTMLInputElement | null;
+          quickInput?.focus();
+        });
+      });
+    });
+
+    container.querySelectorAll('.btn-mkt-cancel-quick-add').forEach(btn => {
+      btn.addEventListener('click', () => {
+        MarketingPage.activeQuickAddCol = null;
+        MarketingPage.render(container);
+      });
+    });
+
+    container.querySelectorAll('.btn-mkt-submit-quick-add').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const col = ((e.currentTarget as HTMLElement).getAttribute('data-col') || 'todo') as any;
+        await submitQuickAdd(col);
+      });
+    });
+
+    container.querySelectorAll('.kanban-quick-add-input').forEach(inputEl => {
+      const col = ((inputEl as HTMLElement).getAttribute('data-col') || 'todo') as any;
+      inputEl.addEventListener('keydown', async (e) => {
+        const ke = e as KeyboardEvent;
+        if (ke.key === 'Enter') {
+          ke.preventDefault();
+          await submitQuickAdd(col);
+        } else if (ke.key === 'Escape') {
+          MarketingPage.activeQuickAddCol = null;
+          MarketingPage.render(container);
+        }
+      });
+    });
+
+    // Drag and drop for tasks
+    container.querySelectorAll('.kanban-card').forEach(card => {
+      card.addEventListener('dragstart', (e) => {
+        const dt = (e as DragEvent).dataTransfer;
+        const id = card.getAttribute('data-task-id');
+        if (id && dt) {
+          MarketingPage.draggedTaskId = id;
+          dt.setData('text/plain', id);
+        }
+      });
+
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-task-id');
+        const task = tasks.find(t => t.id === id);
+        if (task) {
+          modalManager.openEditTaskModal(task, () => {
+            MarketingPage.render(container);
+          });
+        }
+      });
+    });
+
+    container.querySelectorAll('.kanban-column-body').forEach(colBody => {
+      colBody.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        colBody.classList.add('drag-over');
+      });
+
+      colBody.addEventListener('dragleave', () => {
+        colBody.classList.remove('drag-over');
+      });
+
+      colBody.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        colBody.classList.remove('drag-over');
+        const taskId = MarketingPage.draggedTaskId || (e as DragEvent).dataTransfer?.getData('text/plain');
+        const targetStatus = colBody.getAttribute('data-status') as any;
+
+        if (taskId && targetStatus) {
+          const task = tasks.find(t => t.id === taskId);
+          if (task && task.status !== targetStatus) {
+            await window.nubo.tasks.update(taskId, { status: targetStatus });
+            showToast(isEs ? 'Estado de tarea actualizado' : 'Task status updated');
+            MarketingPage.render(container);
+          }
+        }
+      });
     });
   }
 }

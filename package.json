@@ -1,0 +1,41 @@
+{
+  "name": "nubo",
+  "version": "1.0.0",
+  "description": "El hogar de todo tu proyecto - Workspace para creadores y programadores",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev:renderer": "vite",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "watch:electron": "tsc -p tsconfig.electron.json -w",
+    "build": "npm run build:electron && npm run build:renderer",
+    "start": "electron dist-electron/main.js",
+    "dev": "npm run build:electron && concurrently -k \"vite\" \"tsc -p tsconfig.electron.json -w\" \"node scripts/start-electron.js\"",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:dir": "npm run build && electron-builder --dir"
+  },
+  "keywords": [
+    "workspace",
+    "project-manager",
+    "developer-tools",
+    "electron",
+    "desktop"
+  ],
+  "author": "Nubo",
+  "license": "MIT",
+  "dependencies": {
+    "pdfjs-dist": "^3.11.174",
+    "sql.js": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/sql.js": "^1.4.9",
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}

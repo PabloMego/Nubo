@@ -1,0 +1,110 @@
+/* Content Planner Styles */
+.content-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.content-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.content-item-row {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.content-item-row:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.content-row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.platform-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.platform-badge[data-platform="YouTube"] {
+  background: rgba(239, 68, 68, 0.08);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.platform-badge[data-platform="TikTok"] {
+  background: rgba(236, 72, 153, 0.08);
+  color: #EC4899;
+  border-color: rgba(236, 72, 153, 0.25);
+}
+
+.platform-badge[data-platform="X"],
+.platform-badge[data-platform="Twitter"] {
+  background: rgba(17, 17, 17, 0.06);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.platform-badge[data-platform="Instagram"] {
+  background: rgba(244, 63, 94, 0.08);
+  color: #F43F5E;
+  border-color: rgba(244, 63, 94, 0.25);
+}
+
+.platform-badge[data-platform="LinkedIn"] {
+  background: rgba(14, 116, 144, 0.08);
+  color: #0E7490;
+  border-color: rgba(14, 116, 144, 0.25);
+}
+
+.platform-badge[data-platform="Blog"],
+.platform-badge[data-platform="Newsletter"] {
+  background: rgba(139, 92, 246, 0.08);
+  color: #8B5CF6;
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.content-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.content-item-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
+}

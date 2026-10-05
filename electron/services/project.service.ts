@@ -11,6 +11,7 @@ export interface ProjectModel {
   description: string;
   logo?: string;
   color: string;
+  project_type?: 'program' | 'website' | 'script';
   website?: string;
   github?: string;
   status: 'active' | 'paused' | 'completed' | 'idea';
@@ -106,6 +107,7 @@ export class ProjectService {
     description?: string;
     logo?: string;
     color?: string;
+    project_type?: 'program' | 'website' | 'script';
     website?: string;
     github?: string;
     status?: 'active' | 'paused' | 'completed' | 'idea';
@@ -119,9 +121,10 @@ export class ProjectService {
     const baseFolder = data.customFolderPath || settings.storagePath;
     const safeProjectName = data.name.replace(/[<>:"/\\|?*]/g, '_').trim();
     const projectFolderPath = path.join(baseFolder, safeProjectName);
+    const projectType = data.project_type || 'program';
 
-    // Create real folder structure on disk
-    this.fileService.createProjectFolderStructure(projectFolderPath);
+    // Create real folder structure on disk tailored to project type
+    this.fileService.createProjectFolderStructure(projectFolderPath, projectType, data.name.trim());
 
     const project: ProjectModel = {
       id,
@@ -129,6 +132,7 @@ export class ProjectService {
       description: data.description?.trim() || '',
       logo: data.logo || '',
       color: data.color || '#111111',
+      project_type: projectType,
       website: data.website?.trim() || '',
       github: data.github?.trim() || '',
       status: data.status || 'active',
@@ -139,14 +143,15 @@ export class ProjectService {
     };
 
     db.run(`
-      INSERT INTO projects (id, name, description, logo, color, website, github, status, progress, folder_path, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO projects (id, name, description, logo, color, project_type, website, github, status, progress, folder_path, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       project.id,
       project.name,
       project.description,
       project.logo,
       project.color,
+      project.project_type,
       project.website,
       project.github,
       project.status,
@@ -210,6 +215,7 @@ export class ProjectService {
       description: data.description !== undefined ? data.description.trim() : existing.description,
       logo: data.logo !== undefined ? data.logo : existing.logo,
       color: data.color !== undefined ? data.color : existing.color,
+      project_type: data.project_type !== undefined ? data.project_type : (existing.project_type || 'program'),
       website: data.website !== undefined ? data.website.trim() : existing.website,
       github: data.github !== undefined ? data.github.trim() : existing.github,
       status: data.status !== undefined ? data.status : existing.status,
@@ -219,13 +225,14 @@ export class ProjectService {
 
     db.run(`
       UPDATE projects
-      SET name = ?, description = ?, logo = ?, color = ?, website = ?, github = ?, status = ?, progress = ?, updated_at = ?
+      SET name = ?, description = ?, logo = ?, color = ?, project_type = ?, website = ?, github = ?, status = ?, progress = ?, updated_at = ?
       WHERE id = ?
     `, [
       updated.name,
       updated.description,
       updated.logo,
       updated.color,
+      updated.project_type || 'program',
       updated.website,
       updated.github,
       updated.status,

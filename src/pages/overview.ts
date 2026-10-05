@@ -43,6 +43,10 @@ export class OverviewPage {
     const taskProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     const pillClass = project.status === 'active' ? 'success' : project.status === 'completed' ? 'info' : project.status === 'paused' ? 'warning' : 'neutral';
     const statusLabel = t(('status.' + project.status) as any) || project.status;
+    const isEs = getLanguage() === 'es';
+    const type = project.project_type || 'program';
+    const typeLabel = type === 'website' ? (isEs ? 'Sitio Web' : 'Website') : type === 'script' ? 'Script' : (isEs ? 'Programa' : 'Program');
+    const typeIcon = type === 'website' ? icons.globe(12) : type === 'script' ? icons.terminal(12) : icons.package(12);
 
     container.innerHTML = `
       <div class="app-page-hero">
@@ -56,6 +60,10 @@ export class OverviewPage {
               <span class="project-hero-cloud-icon" style="color: ${project.color || 'var(--text-primary)'};">${icons.cloud(26)}</span>
             `}
             <h1>${project.name}</h1>
+            <span class="project-type-chip type-${type}">
+              ${typeIcon}
+              <span>${typeLabel}</span>
+            </span>
             <div class="nubo-status-dropdown" data-project-id="${project.id}">
               <button type="button" class="nubo-status-pill ${pillClass} nubo-status-trigger btn-overview-status" title="${t('home.changeStatus')}">
                 <span class="pulse-dot"></span>

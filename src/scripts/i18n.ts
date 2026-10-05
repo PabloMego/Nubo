@@ -448,6 +448,14 @@ const translations = {
 
     // New Project Modal
     'newProj.modalTitle': 'Crear nuevo proyecto',
+    'newProj.typeLabel': 'Tipo de proyecto',
+    'newProj.typeProgram': 'Programa',
+    'newProj.typeProgramDesc': 'Software, ejecutable (.exe), app o backend',
+    'newProj.typeWeb': 'Sitio Web',
+    'newProj.typeWebDesc': 'Web, landing page o frontend interactivo',
+    'newProj.typeScript': 'Script',
+    'newProj.typeScriptDesc': 'Automatización, bot o procesamiento de datos',
+    'newProj.foldersCreated': 'Estructura que se generará automáticamente:',
     'newProj.name': 'Nombre del proyecto *',
     'newProj.namePlaceholder': 'Ej: Nubo, My Game, SaaS...',
     'newProj.description': 'Descripción',
@@ -999,6 +1007,14 @@ const translations = {
 
     // New Project Modal
     'newProj.modalTitle': 'Create new project',
+    'newProj.typeLabel': 'Project type',
+    'newProj.typeProgram': 'Program',
+    'newProj.typeProgramDesc': 'Software, executable (.exe), app or backend',
+    'newProj.typeWeb': 'Website',
+    'newProj.typeWebDesc': 'Website, landing page or interactive frontend',
+    'newProj.typeScript': 'Script',
+    'newProj.typeScriptDesc': 'Automation, bot or data processing pipeline',
+    'newProj.foldersCreated': 'Tailored folders and starter template:',
     'newProj.name': 'Project name *',
     'newProj.namePlaceholder': 'e.g. Nubo, My Game, SaaS...',
     'newProj.description': 'Description',

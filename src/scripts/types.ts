@@ -1,9 +1,12 @@
+export type ProjectType = 'program' | 'website' | 'script';
+
 export interface Project {
   id: string;
   name: string;
   description: string;
   logo?: string;
   color: string;
+  project_type?: ProjectType;
   website?: string;
   github?: string;
   status: 'active' | 'paused' | 'completed' | 'idea';

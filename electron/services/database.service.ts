@@ -163,6 +163,7 @@ export class DatabaseService {
         description TEXT,
         logo TEXT,
         color TEXT DEFAULT '#111111',
+        project_type TEXT DEFAULT 'program',
         website TEXT,
         github TEXT,
         status TEXT DEFAULT 'active',
@@ -443,6 +444,18 @@ export class DatabaseService {
     ];
 
     for (const sql of devMigrations) {
+      try {
+        this.db.run(sql);
+      } catch {
+        // column already exists
+      }
+    }
+
+    const projectMigrations = [
+      'ALTER TABLE projects ADD COLUMN project_type TEXT DEFAULT "program"'
+    ];
+
+    for (const sql of projectMigrations) {
       try {
         this.db.run(sql);
       } catch {

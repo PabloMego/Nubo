@@ -62,8 +62,13 @@ export class ModalManager {
     });
   }
 
-  public open(title: string, bodyHtml: string, footerHtml: string) {
+  public open(title: string, bodyHtml: string, footerHtml: string, wide: boolean = false) {
     if (!this.titleEl || !this.bodyEl || !this.footerEl || !this.backdropEl) return;
+    const windowEl = this.backdropEl.querySelector('.modal-window');
+    if (windowEl) {
+      if (wide) windowEl.classList.add('modal-wide');
+      else windowEl.classList.remove('modal-wide');
+    }
     this.titleEl.textContent = title;
     this.bodyEl.innerHTML = bodyHtml;
     this.footerEl.innerHTML = footerHtml;
@@ -72,12 +77,108 @@ export class ModalManager {
 
   public close() {
     this.backdropEl?.classList.remove('open');
+    this.backdropEl?.querySelector('.modal-window')?.classList.remove('modal-wide');
   }
 
   public openNewProjectModal(onCreated?: () => void) {
     const isEs = getLanguage() === 'es';
+    type ProjectTypeOption = 'program' | 'website' | 'script';
+    let selectedType: ProjectTypeOption = 'program';
+
+    const foldersData: Record<ProjectTypeOption, { chips: string[]; starterFile: string; note: string }> = {
+      program: {
+        chips: [
+          'Development/Proyecto',
+          'Development/Build',
+          'Development/Docs',
+          'Brand/Logos',
+          'Brand/Banners',
+          'Marketing/Campaigns',
+          'Files',
+          'Notes'
+        ],
+        starterFile: 'Development/Proyecto/README.md',
+        note: isEs
+          ? 'Genera estructura para código fuente, builds compilados (.exe / binarios), documentación y notas.'
+          : 'Generates structure for source code, compiled builds (.exe / binaries), documentation and notes.'
+      },
+      website: {
+        chips: [
+          'Website/Proyecto',
+          'Website/Design',
+          'Website/Assets',
+          'Website/Referencias',
+          'Brand/Logos',
+          'Brand/Manual',
+          'Marketing/Social',
+          'Files'
+        ],
+        starterFile: 'Website/Proyecto/index.html',
+        note: isEs
+          ? 'Genera estructura para diseño UI/UX, código web frontend, assets, referencias y plantilla HTML5.'
+          : 'Generates structure for UI/UX design, frontend code, assets, moodboards and starter HTML5.'
+      },
+      script: {
+        chips: [
+          'Script/Src',
+          'Script/Input',
+          'Script/Output',
+          'Script/Config',
+          'Script/Logs',
+          'Development/Proyecto',
+          'Files',
+          'Notes'
+        ],
+        starterFile: 'Script/Src/main.py',
+        note: isEs
+          ? 'Genera estructura para scripts, entrada de datos (Input), salida procesada (Output), .env y logs.'
+          : 'Generates structure for scripts, raw data (Input), processed results (Output), .env and logs.'
+      }
+    };
+
     const bodyHtml = `
       <div class="form-group">
+        <label class="form-label">${t('newProj.typeLabel')}</label>
+        <div class="project-type-grid" id="new-proj-type-grid">
+          <div class="project-type-card selected" data-type="program">
+            <div class="type-card-top">
+              <div class="type-card-icon">${icons.package(18)}</div>
+              <div class="type-card-check">${icons.check(14)}</div>
+            </div>
+            <div class="type-card-title">${t('newProj.typeProgram')}</div>
+            <div class="type-card-desc">${t('newProj.typeProgramDesc')}</div>
+          </div>
+
+          <div class="project-type-card" data-type="website">
+            <div class="type-card-top">
+              <div class="type-card-icon">${icons.globe(18)}</div>
+              <div class="type-card-check">${icons.check(14)}</div>
+            </div>
+            <div class="type-card-title">${t('newProj.typeWeb')}</div>
+            <div class="type-card-desc">${t('newProj.typeWebDesc')}</div>
+          </div>
+
+          <div class="project-type-card" data-type="script">
+            <div class="type-card-top">
+              <div class="type-card-icon">${icons.terminal(18)}</div>
+              <div class="type-card-check">${icons.check(14)}</div>
+            </div>
+            <div class="type-card-title">${t('newProj.typeScript')}</div>
+            <div class="type-card-desc">${t('newProj.typeScriptDesc')}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-type-preview-box">
+        <div class="project-type-preview-header">
+          ${icons.folder(13)}
+          <span>${t('newProj.foldersCreated')}</span>
+        </div>
+        <div class="project-type-chips-row" id="type-chips-row"></div>
+        <div style="font-size: 11.5px; color: var(--text-muted); line-height: 1.4;" id="type-preview-note"></div>
+      </div>
+
+      <div class="form-group" style="margin-top: 2px;">
         <label class="form-label">${t('newProj.name')}</label>
         <input type="text" id="new-proj-name" placeholder="${t('newProj.namePlaceholder')}" autofocus />
       </div>
@@ -114,7 +215,7 @@ export class ModalManager {
           </button>
         </div>
       </div>
-      <div class="form-group" style="margin-top: 4px;">
+      <div class="form-group" style="margin-top: 2px;">
         <label class="form-label">${t('newProj.accentColor')}</label>
         <div style="display: flex; gap: 8px; align-items: center;">
           <input type="color" id="new-proj-color" value="#111111" style="width: 40px; height: 32px; padding: 2px; cursor: pointer;" />
@@ -128,13 +229,50 @@ export class ModalManager {
       <button class="btn btn-primary" id="modal-submit-proj">${t('newProj.create')}</button>
     `;
 
-    this.open(t('newProj.modalTitle'), bodyHtml, footerHtml);
+    this.open(t('newProj.modalTitle'), bodyHtml, footerHtml, true);
 
     const nameInput = document.getElementById('new-proj-name') as HTMLInputElement;
     const webInput = document.getElementById('new-proj-web') as HTMLInputElement;
     const noWebCheck = document.getElementById('check-no-website') as HTMLInputElement;
     const webHint = document.getElementById('website-hint') as HTMLElement;
     const btnCreateGh = document.getElementById('btn-create-github-repo');
+    const typeCards = document.querySelectorAll('.project-type-card');
+    const chipsRow = document.getElementById('type-chips-row');
+    const previewNote = document.getElementById('type-preview-note');
+
+    const renderTypePreview = (type: ProjectTypeOption) => {
+      const data = foldersData[type];
+      if (chipsRow) {
+        chipsRow.innerHTML = data.chips.map((c, i) => `
+          <span class="folder-chip ${i === 0 ? 'highlight' : ''}">
+            ${icons.folder(11)}
+            <span>${c}</span>
+          </span>
+        `).join('') + `
+          <span class="folder-chip highlight" style="background: rgba(16, 185, 129, 0.1); color: #34D399; border-color: rgba(16, 185, 129, 0.3);">
+            ${icons.fileText(11)}
+            <span>${data.starterFile}</span>
+          </span>
+        `;
+      }
+      if (previewNote) {
+        previewNote.textContent = data.note;
+      }
+    };
+
+    typeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        typeCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const type = card.getAttribute('data-type') as ProjectTypeOption;
+        if (type) {
+          selectedType = type;
+          renderTypePreview(selectedType);
+        }
+      });
+    });
+
+    renderTypePreview(selectedType);
 
     nameInput?.focus();
 
@@ -182,6 +320,7 @@ export class ModalManager {
         const project = await window.nubo.projects.create({
           name,
           description: desc,
+          project_type: selectedType,
           website: web,
           github: gh,
           color

@@ -254,10 +254,14 @@ export class HomePage {
   }
 
   private static renderProjectCard(p: Project): string {
+    const isEs = getLanguage() === 'es';
     const initial = p.name ? p.name.charAt(0).toUpperCase() : 'P';
     const progress = p.progress || 0;
     const pillClass = p.status === 'active' ? 'success' : p.status === 'completed' ? 'info' : p.status === 'paused' ? 'warning' : 'neutral';
     const statusText = t(('status.' + p.status) as any) || p.status;
+    const type = p.project_type || 'program';
+    const typeLabel = type === 'website' ? (isEs ? 'Web' : 'Website') : type === 'script' ? 'Script' : (isEs ? 'Programa' : 'Program');
+    const typeIcon = type === 'website' ? icons.globe(11) : type === 'script' ? icons.terminal(11) : icons.package(11);
 
     return `
       <div class="project-card" data-project-id="${p.id}">
@@ -268,12 +272,17 @@ export class HomePage {
             </div>
             <div class="project-card-info">
               <div class="project-card-name">${p.name}</div>
-              <div class="nubo-status-dropdown" data-project-id="${p.id}">
-                <button type="button" class="nubo-status-pill ${pillClass} nubo-status-trigger btn-project-status" title="${t('home.changeStatus')}">
-                  <span class="pulse-dot"></span>
-                  <span>${statusText}</span>
-                  ${icons.chevronDown(10)}
-                </button>
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span class="project-type-chip type-${type}">
+                  ${typeIcon}
+                  <span>${typeLabel}</span>
+                </span>
+                <div class="nubo-status-dropdown" data-project-id="${p.id}">
+                  <button type="button" class="nubo-status-pill ${pillClass} nubo-status-trigger btn-project-status" title="${t('home.changeStatus')}">
+                    <span class="pulse-dot"></span>
+                    <span>${statusText}</span>
+                    ${icons.chevronDown(10)}
+                  </button>
                 <div class="nubo-status-menu">
                   <div class="nubo-status-option ${p.status === 'active' ? 'selected' : ''}" data-status="active">
                     <span class="status-option-dot" style="background: #10B981; box-shadow: 0 0 6px rgba(16,185,129,0.4);"></span>

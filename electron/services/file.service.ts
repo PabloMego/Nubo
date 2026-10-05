@@ -51,8 +51,6 @@ export class FileService {
         'Marketing',
         path.join('Marketing', 'Campaigns'),
         path.join('Marketing', 'Social'),
-        'Development',
-        path.join('Development', 'Proyecto'),
         'Files',
         'Notes'
       ];
@@ -271,11 +269,14 @@ if __name__ == "__main__":
       'Content',
       path.join('Content', 'Scripts'),
       path.join('Content', 'Media'),
-      'Development',
-      path.join('Development', 'Specs'),
       'Files',
       'Notes'
     ];
+
+    // Only create Development subfolders for non-website projects
+    if (!fs.existsSync(path.join(projectRoot, 'Website'))) {
+      subfolders.push('Development', path.join('Development', 'Specs'));
+    }
     for (const sub of subfolders) {
       const full = path.join(projectRoot, sub);
       if (!fs.existsSync(full)) {

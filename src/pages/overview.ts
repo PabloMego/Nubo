@@ -140,6 +140,37 @@ export class OverviewPage {
                   <div class="quick-card-title">${t('overview.notesTitle')}</div>
                   <div class="quick-card-desc">${isEs ? 'Parámetros, credenciales y apuntes' : 'Parameters, credentials & notes'}</div>
                 </div>
+              ` : type === 'website' ? `
+                <div class="quick-card" data-goto="guide" style="border: 1px solid rgba(59, 130, 246, 0.35); background: linear-gradient(180deg, rgba(59, 130, 246, 0.06) 0%, var(--bg-surface) 100%);">
+                  <div class="quick-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #3B82F6;">${icons.compass(18)}</div>
+                  <div class="quick-card-title">${t('guide.title') || 'Guía del Proyecto'}</div>
+                  <div class="quick-card-desc">${getLanguage() === 'es' ? 'Hoja de ruta paso a paso (4 fases)' : 'Step-by-step roadmap (4 phases)'}</div>
+                </div>
+                <div class="quick-card" data-goto="website" style="border: 1px solid rgba(139, 92, 246, 0.35); background: linear-gradient(180deg, rgba(139, 92, 246, 0.06) 0%, var(--bg-surface) 100%);">
+                  <div class="quick-card-icon" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">${icons.globe(18)}</div>
+                  <div class="quick-card-title">${t('overview.websiteTitle')}</div>
+                  <div class="quick-card-desc">${isEs ? 'Código frontend, páginas, diseño UI/UX y SEO' : 'Frontend code, pages, UI/UX design & SEO'}</div>
+                </div>
+                <div class="quick-card" data-goto="brand">
+                  <div class="quick-card-icon" style="background: rgba(255, 154, 0, 0.1); color: #FF9A00;">${icons.palette(18)}</div>
+                  <div class="quick-card-title">${t('overview.brandTitle')}</div>
+                  <div class="quick-card-desc">${t('overview.brandDesc')}</div>
+                </div>
+                <div class="quick-card" data-goto="marketing">
+                  <div class="quick-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">${icons.target(18)}</div>
+                  <div class="quick-card-title">${t('overview.marketingTitle')}</div>
+                  <div class="quick-card-desc">${t('overview.marketingDesc')}</div>
+                </div>
+                <div class="quick-card" data-goto="files">
+                  <div class="quick-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">${icons.folder(18)}</div>
+                  <div class="quick-card-title">${t('overview.filesTitle')}</div>
+                  <div class="quick-card-desc">${t('overview.filesDesc')}</div>
+                </div>
+                <div class="quick-card" data-goto="notes">
+                  <div class="quick-card-icon" style="background: rgba(6, 182, 212, 0.1); color: #06B6D4;">${icons.fileText(18)}</div>
+                  <div class="quick-card-title">${t('overview.notesTitle')}</div>
+                  <div class="quick-card-desc">${t('overview.notesDesc')}</div>
+                </div>
               ` : `
                 <div class="quick-card" data-goto="guide" style="border: 1px solid rgba(59, 130, 246, 0.35); background: linear-gradient(180deg, rgba(59, 130, 246, 0.06) 0%, var(--bg-surface) 100%);">
                   <div class="quick-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #3B82F6;">${icons.compass(18)}</div>
@@ -156,20 +187,10 @@ export class OverviewPage {
                   <div class="quick-card-title">${t('overview.brandTitle')}</div>
                   <div class="quick-card-desc">${t('overview.brandDesc')}</div>
                 </div>
-                <div class="quick-card" data-goto="website">
-                  <div class="quick-card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">${icons.globe(18)}</div>
-                  <div class="quick-card-title">${t('overview.websiteTitle')}</div>
-                  <div class="quick-card-desc">${t('overview.websiteDesc')}</div>
-                </div>
                 <div class="quick-card" data-goto="marketing">
                   <div class="quick-card-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">${icons.target(18)}</div>
                   <div class="quick-card-title">${t('overview.marketingTitle')}</div>
                   <div class="quick-card-desc">${t('overview.marketingDesc')}</div>
-                </div>
-                <div class="quick-card" data-goto="content">
-                  <div class="quick-card-icon" style="background: rgba(236, 72, 153, 0.1); color: #EC4899;">${icons.video(18)}</div>
-                  <div class="quick-card-title">${t('overview.contentTitle')}</div>
-                  <div class="quick-card-desc">${t('overview.contentDesc')}</div>
                 </div>
                 <div class="quick-card" data-goto="files">
                   <div class="quick-card-icon" style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">${icons.folder(18)}</div>

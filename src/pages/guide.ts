@@ -44,7 +44,8 @@ export class GuidePage {
     }
 
     const isEs = getLanguage() === 'es';
-    const steps = this.getSteps(isEs);
+    const isWebsite = project.project_type === 'website';
+    const steps = this.getSteps(isEs, project.project_type);
 
     container.innerHTML = `
       <div class="guide-container">
@@ -136,15 +137,22 @@ export class GuidePage {
             </div>
             <div class="guide-rule-text">
               <strong>${isEs ? 'Recomendación de Nubo:' : 'Nubo Best Practice:'}</strong> 
-              ${isEs ? '1) Haz primero el prototipo funcional ("feo"). 2) Define la identidad en Marca & Assets. 3) Vuelve al Paso 1 para aplicar el estilo de la marca al prototipo. 4) Construye tu Web y ejecuta Marketing.' : '1) Build the functional ("ugly") prototype first. 2) Define identity in Brand & Assets. 3) Return to Step 1 to style the prototype with the brand. 4) Build Website & launch Marketing.'}
+              ${isWebsite
+                ? (isEs
+                    ? '1) Define estructura de páginas y código base en Sitio Web. 2) Define la identidad en Marca & Assets. 3) Aplica referencias y diseño en Sitio Web. 4) Ejecuta Marketing y SEO.'
+                    : '1) Define page architecture and frontend code in Website. 2) Define identity in Brand & Assets. 3) Apply design moodboards and assets to Website. 4) Execute Marketing & SEO.')
+                : (isEs
+                    ? '1) Haz primero el prototipo funcional ("feo"). 2) Define la identidad en Marca & Assets. 3) Vuelve al Paso 1 para aplicar el estilo de la marca al prototipo. 4) Construye tu Web y ejecuta Marketing.'
+                    : '1) Build the functional ("ugly") prototype first. 2) Define identity in Brand & Assets. 3) Return to Step 1 to style the prototype with the brand. 4) Build Website & launch Marketing.')
+              }
             </div>
           </div>
           <div class="guide-rule-flow">
-            <span class="guide-rule-flow-step">${isEs ? '1. Prototipo Feo' : '1. Ugly MVP'}</span>
+            <span class="guide-rule-flow-step">${isWebsite ? (isEs ? '1. Wireframe Web' : '1. Web MVP') : (isEs ? '1. Prototipo Feo' : '1. Ugly MVP')}</span>
             <span>→</span>
             <span class="guide-rule-flow-step">${isEs ? '2. Marca' : '2. Brand'}</span>
             <span>→</span>
-            <span class="guide-rule-flow-step" title="Volver al Paso 1 para aplicar el estilo">${isEs ? '3. Aplicar Marca (Paso 1)' : '3. Apply Brand (Step 1)'}</span>
+            <span class="guide-rule-flow-step" title="${isWebsite ? 'Aplicar estilo en Sitio Web' : 'Volver al Paso 1 para aplicar el estilo'}">${isWebsite ? (isEs ? '3. Diseño Web' : '3. Web Design') : (isEs ? '3. Aplicar Marca (Paso 1)' : '3. Apply Brand (Step 1)')}</span>
             <span>→</span>
             <span class="guide-rule-flow-step">${isEs ? '4. Web & Mkt' : '4. Web & Mkt'}</span>
           </div>
@@ -182,27 +190,39 @@ export class GuidePage {
     });
   }
 
-  private static getSteps(isEs: boolean): GuideStep[] {
+  private static getSteps(isEs: boolean, projectType?: string): GuideStep[] {
+    const isWebsite = projectType === 'website';
+
     return [
       {
         id: 'prototype',
         number: '01',
-        tag: isEs ? 'PASO 01 · TÉCNICA' : 'STEP 01 · TECH',
-        title: isEs ? 'Archivos y Prototipo (Feo)' : 'Files & Prototype (Ugly)',
-        tagline: isEs 
-          ? 'Especificaciones del producto, estructura de carpetas y prototipo funcional inicial ("prototipo feo").'
-          : 'Product specifications, project folder structure, and initial functional MVP ("ugly prototype").',
+        tag: isWebsite
+          ? (isEs ? 'PASO 01 · ESTRUCTURA' : 'STEP 01 · STRUCTURE')
+          : (isEs ? 'PASO 01 · TÉCNICA' : 'STEP 01 · TECH'),
+        title: isWebsite
+          ? (isEs ? 'Estructura Web y Prototipo' : 'Web Structure & Prototype')
+          : (isEs ? 'Archivos y Prototipo (Feo)' : 'Files & Prototype (Ugly)'),
+        tagline: isWebsite
+          ? (isEs ? 'Estructura de páginas, código frontend inicial y repositorio Git en la sección Sitio Web.' : 'Page structure, initial frontend code and Git repository in Website section.')
+          : (isEs 
+              ? 'Especificaciones del producto, estructura de carpetas y prototipo funcional inicial ("prototipo feo").'
+              : 'Product specifications, project folder structure, and initial functional MVP ("ugly prototype").'),
         accent: '#3B82F6',
         bgLight: 'rgba(59, 130, 246, 0.12)',
-        icon: (s = 24) => icons.code(s),
-        deliverables: [
+        icon: (s = 24) => isWebsite ? icons.globe(s) : icons.code(s),
+        deliverables: isWebsite ? [
+          { icon: icons.globe, label: isEs ? 'Estructura de páginas y navegación inicial' : 'Initial page architecture & navigation' },
+          { icon: icons.folder, label: isEs ? 'Código HTML5/JS y repositorio Git (Website/Proyecto)' : 'HTML5/JS code and Git repository (Website/Proyecto)' },
+          { icon: icons.columns, label: isEs ? 'Tablero Kanban de tareas del sitio' : 'Website Kanban tasks board' }
+        ] : [
           { icon: icons.check, label: isEs ? 'Prototipo funcional mínimo ("prototipo feo")' : 'Initial functional prototype ("ugly prototype")' },
           { icon: icons.folder, label: isEs ? 'Estructura de archivos y repo Git' : 'Folder structure and Git repository' },
           { icon: icons.fileText, label: isEs ? 'Especificaciones y backlog de tareas' : 'Specifications and task backlog' }
         ],
         primaryAction: {
-          label: isEs ? 'Ir a Desarrollo' : 'Go to Development',
-          section: 'development'
+          label: isWebsite ? (isEs ? 'Ir a Sitio Web' : 'Go to Website') : (isEs ? 'Ir a Desarrollo' : 'Go to Development'),
+          section: isWebsite ? 'website' : 'development'
         },
         secondaryAction: {
           label: isEs ? 'Archivos' : 'Files',
@@ -215,23 +235,27 @@ export class GuidePage {
         tag: isEs ? 'PASO 02 · IDENTIDAD' : 'STEP 02 · IDENTITY',
         title: isEs ? 'Marca e Identidad' : 'Brand & Assets',
         tagline: isEs
-          ? 'Personalidad visual: define logos, colores y vuelve al Paso 1 para hacer el prototipo feo con el estilo definido de la marca.'
-          : 'Visual personality: define logos, colors, and return to Step 1 to style the ugly prototype with the defined brand.',
+          ? (isWebsite
+              ? 'Personalidad visual: define logos, tipografías, colores y moodboards de inspiración para tu web.'
+              : 'Personalidad visual: define logos, colores y vuelve al Paso 1 para hacer el prototipo feo con el estilo definido de la marca.')
+          : (isWebsite
+              ? 'Visual personality: define logos, typography, colors and moodboard inspiration for your web.'
+              : 'Visual personality: define logos, colors, and return to Step 1 to style the ugly prototype with the defined brand.'),
         accent: '#EC4899',
         bgLight: 'rgba(236, 72, 153, 0.12)',
         icon: (s = 24) => icons.palette(s),
         deliverables: [
           { icon: icons.file, label: isEs ? 'Archivo maestro Illustrator (.ai) y logos' : 'Master Illustrator file (.ai) & official logos' },
           { icon: icons.sparkles, label: isEs ? 'Paleta de colores HEX y tipografías' : 'HEX color palette and typography' },
-          { icon: icons.arrowRight, label: isEs ? 'Paso 3: Volver a Paso 1 para hacer el prototipo feo con el estilo definido de la marca' : 'Step 3: Return to Step 1 to make the ugly prototype with the defined brand style' }
+          { icon: icons.arrowRight, label: isEs ? (isWebsite ? 'Paso 3: Aplicar diseño y referencias en Sitio Web' : 'Paso 3: Volver a Paso 1 para hacer el prototipo feo con el estilo definido de la marca') : (isWebsite ? 'Step 3: Apply design and references in Website' : 'Step 3: Return to Step 1 to make the ugly prototype with the defined brand style') }
         ],
         primaryAction: {
           label: isEs ? 'Ir a Marca & Assets' : 'Go to Brand & Assets',
           section: 'brand'
         },
         secondaryAction: {
-          label: isEs ? 'Volver a Paso 1' : 'Back to Step 1',
-          section: 'development'
+          label: isEs ? (isWebsite ? 'Sitio Web' : 'Volver a Paso 1') : (isWebsite ? 'Website' : 'Back to Step 1'),
+          section: isWebsite ? 'website' : 'development'
         }
       },
       {

@@ -77,6 +77,10 @@ class Store {
       if (nonScriptSections.includes(this.state.activeSection)) {
         this.state.activeSection = 'overview';
       }
+    } else if (project?.project_type === 'website') {
+      if (this.state.activeSection === 'development') {
+        this.state.activeSection = 'website';
+      }
     }
     this.notify();
   }
@@ -89,14 +93,29 @@ class Store {
       if (nonScriptSections.includes(targetSection)) {
         targetSection = 'overview';
       }
+    } else if (project?.project_type === 'website') {
+      if (targetSection === 'development') {
+        targetSection = 'website';
+      }
     }
     this.state.activeSection = targetSection;
     this.notify();
   }
 
   public setActiveSection(section: AppSection) {
-    this.state.activeSection = section;
-    if (section === 'home') {
+    let targetSection = section;
+    if (this.state.currentProject?.project_type === 'script') {
+      const nonScriptSections: AppSection[] = ['brand', 'website', 'marketing', 'content', 'guide'];
+      if (nonScriptSections.includes(targetSection)) {
+        targetSection = 'overview';
+      }
+    } else if (this.state.currentProject?.project_type === 'website') {
+      if (targetSection === 'development') {
+        targetSection = 'website';
+      }
+    }
+    this.state.activeSection = targetSection;
+    if (targetSection === 'home') {
       this.state.currentProject = null;
     }
     this.notify();

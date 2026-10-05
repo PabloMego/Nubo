@@ -240,6 +240,14 @@ export class DevelopmentService {
         return { success: true, path: norm, folders: ['Script', 'Script/Src'] };
       }
 
+      // If it's a website project, development happens inside Website/Proyecto
+      if (fs.existsSync(path.join(norm, 'Website')) && !fs.existsSync(path.join(norm, 'Development', 'Build'))) {
+        const webProyecto = path.join(norm, 'Website', 'Proyecto');
+        if (!fs.existsSync(webProyecto)) fs.mkdirSync(webProyecto, { recursive: true });
+        this.fileService.createProjectFolderStructure(norm, 'website');
+        return { success: true, path: norm, folders: ['Website', 'Website/Proyecto'] };
+      }
+
       // Ensure Development folder exists
       const devFolder = path.join(norm, 'Development');
       if (!fs.existsSync(devFolder)) {
@@ -455,7 +463,42 @@ export class DevelopmentService {
       return norm;
     }
 
-    // 6. Project root folder -> Development/Proyecto by default
+    // 6. Explicit Script/Src path
+    if (lower.endsWith(path.sep + 'script' + path.sep + 'src') || lower.endsWith('/script/src') || lower.endsWith('\\script\\src')) {
+      if (!fs.existsSync(norm)) {
+        try { fs.mkdirSync(norm, { recursive: true }); } catch (e) {}
+      }
+      return norm;
+    }
+
+    // 7. Script section folder -> append /Src
+    if (lower.endsWith(path.sep + 'script') || lower.endsWith('/script') || lower.endsWith('\\script')) {
+      const scriptSrc = path.join(norm, 'Src');
+      if (!fs.existsSync(scriptSrc)) {
+        try { fs.mkdirSync(scriptSrc, { recursive: true }); } catch (e) {}
+      }
+      return scriptSrc;
+    }
+
+    // 8. If root contains Script (and not Website/Development/Build), route to Script/Src
+    if (fs.existsSync(path.join(norm, 'Script')) && !fs.existsSync(path.join(norm, 'Website')) && !fs.existsSync(path.join(norm, 'Development', 'Build'))) {
+      const scriptSrc = path.join(norm, 'Script', 'Src');
+      if (!fs.existsSync(scriptSrc)) {
+        try { fs.mkdirSync(scriptSrc, { recursive: true }); } catch (e) {}
+      }
+      return scriptSrc;
+    }
+
+    // 9. If root contains Website (and not Development/Build), route to Website/Proyecto
+    if (fs.existsSync(path.join(norm, 'Website')) && !fs.existsSync(path.join(norm, 'Development', 'Build'))) {
+      const webProyecto = path.join(norm, 'Website', 'Proyecto');
+      if (!fs.existsSync(webProyecto)) {
+        try { fs.mkdirSync(webProyecto, { recursive: true }); } catch (e) {}
+      }
+      return webProyecto;
+    }
+
+    // 10. Project root folder -> Development/Proyecto by default for standard program
     const devFolder = path.join(norm, 'Development');
     if (!fs.existsSync(devFolder)) {
       try { fs.mkdirSync(devFolder, { recursive: true }); } catch (e) {}

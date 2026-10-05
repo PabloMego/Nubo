@@ -19,26 +19,41 @@ export class Sidebar {
     const activeSec = state.activeSection;
     const isEs = getLanguage() === 'es';
     const isScript = currentProj?.project_type === 'script';
+    const isWebsite = currentProj?.project_type === 'website';
 
     this.container.className = `sidebar ${isCollapsed ? 'collapsed' : ''}`;
 
-    const projectSections: Array<{ id: AppSection; label: string; icon: string }> = isScript
-      ? [
-          { id: 'overview', label: t('nav.overview'), icon: icons.overview(15) },
-          { id: 'development', label: isEs ? 'Script & Terminal' : 'Script & Terminal', icon: icons.terminal(15) },
-          { id: 'files', label: t('nav.files'), icon: icons.folder(15) },
-          { id: 'notes', label: t('nav.notes'), icon: icons.fileText(15) }
-        ]
-      : [
-          { id: 'overview', label: t('nav.overview'), icon: icons.overview(15) },
-          { id: 'guide', label: t('nav.guide'), icon: icons.compass(15) },
-          { id: 'development', label: t('nav.development'), icon: icons.code(15) },
-          { id: 'brand', label: t('nav.brand'), icon: icons.palette(15) },
-          { id: 'website', label: t('nav.website'), icon: icons.globe(15) },
-          { id: 'marketing', label: t('nav.marketing'), icon: icons.target(15) },
-          { id: 'files', label: t('nav.files'), icon: icons.folder(15) },
-          { id: 'notes', label: t('nav.notes'), icon: icons.fileText(15) }
-        ];
+    let projectSections: Array<{ id: AppSection; label: string; icon: string }>;
+
+    if (isScript) {
+      projectSections = [
+        { id: 'overview', label: t('nav.overview'), icon: icons.overview(15) },
+        { id: 'development', label: isEs ? 'Script & Terminal' : 'Script & Terminal', icon: icons.terminal(15) },
+        { id: 'files', label: t('nav.files'), icon: icons.folder(15) },
+        { id: 'notes', label: t('nav.notes'), icon: icons.fileText(15) }
+      ];
+    } else if (isWebsite) {
+      projectSections = [
+        { id: 'overview', label: t('nav.overview'), icon: icons.overview(15) },
+        { id: 'guide', label: t('nav.guide'), icon: icons.compass(15) },
+        { id: 'website', label: t('nav.website'), icon: icons.globe(15) },
+        { id: 'brand', label: t('nav.brand'), icon: icons.palette(15) },
+        { id: 'marketing', label: t('nav.marketing'), icon: icons.target(15) },
+        { id: 'files', label: t('nav.files'), icon: icons.folder(15) },
+        { id: 'notes', label: t('nav.notes'), icon: icons.fileText(15) }
+      ];
+    } else {
+      // program (default)
+      projectSections = [
+        { id: 'overview', label: t('nav.overview'), icon: icons.overview(15) },
+        { id: 'guide', label: t('nav.guide'), icon: icons.compass(15) },
+        { id: 'development', label: t('nav.development'), icon: icons.code(15) },
+        { id: 'brand', label: t('nav.brand'), icon: icons.palette(15) },
+        { id: 'marketing', label: t('nav.marketing'), icon: icons.target(15) },
+        { id: 'files', label: t('nav.files'), icon: icons.folder(15) },
+        { id: 'notes', label: t('nav.notes'), icon: icons.fileText(15) }
+      ];
+    }
 
     this.container.innerHTML = `
       <div class="sidebar-header">

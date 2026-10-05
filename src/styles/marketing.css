@@ -1,0 +1,1809 @@
+/* ==========================================================================
+   MARKETING & CONTENT — Unified Workspace Styles
+   ========================================================================== */
+
+/* Main Container & Subnav */
+.mkt-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding-bottom: var(--space-2xl);
+}
+
+.mkt-subnav-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-md);
+  scrollbar-width: none;
+}
+
+.mkt-subnav-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.mkt-subnav-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.mkt-subnav-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.mkt-subnav-tab.active {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-tab-count-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.mkt-subnav-tab.active .mkt-tab-count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+}
+
+/* Action Header Toolbar */
+.mkt-view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.mkt-view-title-group h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.mkt-view-title-group p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 2px 0 0 0;
+}
+
+.mkt-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Workflow Visual Strip */
+.mkt-workflow-strip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 960px) {
+  .mkt-workflow-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mkt-workflow-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mkt-workflow-step:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-workflow-step-num {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mkt-workflow-step-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mkt-workflow-step-status {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+/* Recommendation Card */
+.mkt-recommendation-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.05));
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* ==========================================================================
+   1. OVERVIEW VIEW
+   ========================================================================== */
+.mkt-overview-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-md);
+}
+
+@media (max-width: 1024px) {
+  .mkt-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mkt-hero-banner {
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-subtle) 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.mkt-hero-banner::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-tint) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.mkt-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  width: fit-content;
+}
+
+.mkt-hero-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.mkt-hero-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 600px;
+}
+
+.mkt-hero-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mkt-stat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mkt-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mkt-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Overview Cards */
+.mkt-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mkt-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mkt-upcoming-list,
+.mkt-campaigns-mini-list,
+.mkt-accounts-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mkt-upcoming-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+}
+
+.mkt-upcoming-item:hover {
+  border-color: var(--border-strong);
+}
+
+.mkt-upcoming-date {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.mkt-upcoming-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mkt-upcoming-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Folders quick bar */
+.mkt-folders-strip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mkt-folders-strip-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mkt-folders-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mkt-folder-tag {
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   2. LAUNCH CHECKLIST VIEW
+   ========================================================================== */
+.mkt-launch-progress-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mkt-progress-percentage {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.mkt-progress-fraction {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.mkt-progress-track {
+  width: 100%;
+  height: 10px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.mkt-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981, #059669);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.mkt-launch-tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mkt-launch-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  gap: 12px;
+}
+
+.mkt-launch-task-item:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.mkt-launch-task-item.completed {
+  background: var(--bg-subtle);
+  opacity: 0.85;
+}
+
+.mkt-launch-task-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mkt-launch-task-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mkt-launch-task-item.completed .mkt-launch-task-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.mkt-status-select {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   3. CHANNELS & ACCOUNTS VIEW
+   ========================================================================== */
+.mkt-accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.mkt-account-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.mkt-account-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mkt-account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mkt-account-platform-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mkt-account-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mkt-account-handle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mkt-account-email,
+.mkt-account-url {
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mkt-missing-checklist-banner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mkt-missing-checklist-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mkt-account-check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-app);
+  color: var(--text-secondary);
+}
+
+.mkt-account-check-pill.active {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #10B981;
+  font-weight: 600;
+}
+
+.mkt-account-check-pill.missing {
+  background: var(--bg-subtle);
+  border-color: var(--border-subtle);
+  color: var(--text-muted);
+}
+
+/* Emails Table */
+.mkt-emails-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: var(--space-lg);
+}
+
+.mkt-emails-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.mkt-email-box {
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.mkt-email-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+
+.mkt-email-address {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ==========================================================================
+   4. MARKETING IDEAS VIEW
+   ========================================================================== */
+.mkt-inspiration-banner {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(168, 85, 247, 0.06));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mkt-ideas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-md);
+}
+
+.mkt-idea-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.mkt-idea-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.mkt-idea-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mkt-idea-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.mkt-idea-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mkt-idea-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.mkt-idea-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   5. CONTENT VIEW (6-COLUMN KANBAN & REUSABILITY GROUPS)
+   ========================================================================== */
+.mkt-content-kanban {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(240px, 1fr));
+  gap: 14px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: var(--space-md);
+}
+
+/* Drag and Drop Kanban Styles */
+.mkt-content-col {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 520px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.mkt-content-col.drag-over {
+  background-color: rgba(99, 102, 241, 0.05);
+  border-color: var(--accent-primary);
+  border-style: dashed;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.mkt-content-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mkt-content-col-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mkt-content-card {
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.mkt-content-card:active {
+  cursor: grabbing;
+}
+
+.mkt-content-card.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.97);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.mkt-content-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mkt-card-drag-grip {
+  color: var(--text-muted);
+  opacity: 0.35;
+  transition: opacity var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.mkt-content-card:hover .mkt-card-drag-grip {
+  opacity: 1;
+  color: var(--text-secondary);
+}
+
+.mkt-card-hook-box {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-primary);
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mkt-card-hook-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mkt-card-hook-title {
+  font-weight: 700;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-primary);
+}
+
+.mkt-card-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-app);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mkt-card-copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.mkt-card-script-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px dashed var(--border-subtle);
+}
+
+.mkt-card-readiness-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.mkt-readiness-chip {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.mkt-readiness-chip.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* Platform Filter Bar */
+.mkt-platform-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+
+.mkt-platform-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.mkt-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.mkt-filter-chip:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.mkt-filter-chip.active {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  border-color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Empty column state */
+.mkt-col-empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 11px;
+  text-align: center;
+  gap: 4px;
+}
+
+/* Integrated Checklist in Video Planner */
+.mkt-planner-checklist-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mkt-planner-checklist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mkt-planner-checklist-body {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mkt-inline-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.mkt-inline-task-item:hover {
+  border-color: var(--border-strong);
+}
+
+.mkt-inline-task-item.completed {
+  opacity: 0.65;
+  text-decoration: line-through;
+  background: transparent;
+}
+
+.mkt-inline-task-text {
+  font-size: 12px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mkt-content-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.mkt-content-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mkt-content-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-top: 6px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.mkt-reusability-banner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   6. CAMPAIGNS VIEW
+   ========================================================================== */
+.mkt-campaigns-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.mkt-campaign-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.mkt-campaign-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.mkt-campaign-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mkt-campaign-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.mkt-campaign-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.mkt-campaign-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg-app);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
+   7. CALENDAR VIEW
+   ========================================================================== */
+.mkt-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.mkt-calendar-day-header {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  padding: 8px 0;
+}
+
+.mkt-calendar-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  min-height: 110px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all var(--transition-fast);
+}
+
+.mkt-calendar-cell:hover {
+  border-color: var(--border-strong);
+}
+
+.mkt-calendar-cell.today {
+  border-color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mkt-calendar-cell.other-month {
+  opacity: 0.4;
+  background: var(--bg-app);
+}
+
+.mkt-calendar-day-num {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.mkt-calendar-item-pill {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 7px;
+  border-radius: var(--radius-xs, 4px);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.mkt-calendar-item-pill:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.mkt-cal-item-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   8. METRICS VIEW
+   ========================================================================== */
+.mkt-metrics-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.mkt-kpi-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-kpi-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mkt-kpi-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.mkt-kpi-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.mkt-metrics-table-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.mkt-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.mkt-table th {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mkt-table td {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mkt-table tr:last-child td {
+  border-bottom: none;
+}
+
+.mkt-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+/* Status & Platform Colors */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.status-pill.status-active,
+.status-pill.status-completed,
+.status-pill.status-published,
+.status-pill.status-done {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.status-pill.status-planned,
+.status-pill.status-scheduled,
+.status-pill.status-in_progress,
+.status-pill.status-editing,
+.status-pill.status-recording,
+.status-pill.status-script {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+}
+
+.status-pill.status-idea,
+.status-pill.status-pending,
+.status-pill.status-not_created,
+.status-pill.status-todo {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.status-pill.status-cancelled,
+.status-pill.status-discarded,
+.status-pill.status-inactive {
+  background: rgba(156, 163, 175, 0.15);
+  color: #6B7280;
+}
+
+/* ==========================================================================
+   CAMPAIGN WORKSPACE & STEP TABS
+   ========================================================================== */
+.cmp-workspace-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-md);
+}
+
+.cmp-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cmp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cmp-step-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.cmp-step-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.cmp-step-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.cmp-step-tab.active {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.cmp-overview-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-md);
+}
+
+.cmp-card-interactive {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cmp-card-interactive:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.cmp-step-tab.active .mkt-tab-count-badge {
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+}
+
+.mkt-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 3px;
+}
+
+.mkt-view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mkt-view-toggle-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mkt-view-toggle-btn.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Interactive Platform Selector in Video Modal */
+.cnt-platform-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+  .cnt-platform-selector-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.cnt-platform-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-app);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.cnt-platform-chip:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.cnt-platform-chip.active {
+  background: var(--bg-surface);
+  border-color: var(--color-primary, #6366F1);
+  box-shadow: 0 0 0 1px var(--color-primary, #6366F1);
+}
+
+.cnt-platform-chip .cnt-platform-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cnt-platform-chip .cnt-platform-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cnt-platform-chip.active .cnt-platform-name {
+  font-weight: 600;
+}
+
+.cnt-platform-chip .cnt-chip-checkbox {
+  margin-left: auto;
+  pointer-events: none;
+  accent-color: var(--color-primary, #6366F1);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.cnt-multi-platform-banner {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   VISUAL DATE & TIME PICKER (Calendar + Time)
+   ========================================================================== */
+.modal-window:has(.cnt-datetime-section) {
+  max-width: 560px;
+}
+
+.cnt-datetime-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cnt-datetime-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cnt-datetime-label-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cnt-datetime-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+}
+
+.cnt-datetime-badge.active {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--color-primary, #6366F1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Quick date preset chips */
+.cnt-date-presets-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.cnt-preset-chip {
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 6px);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.cnt-preset-chip:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.cnt-preset-chip.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-primary, #6366F1);
+  color: var(--color-primary, #6366F1);
+  font-weight: 600;
+}
+
+/* 2-column or responsive card: mini-calendar on left, time on right */
+.cnt-datetime-card {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 14px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+@media (max-width: 520px) {
+  .cnt-datetime-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mini Calendar */
+.cnt-mini-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cnt-mini-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cnt-mini-cal-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.cnt-mini-cal-days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.cnt-mini-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cnt-mini-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+  position: relative;
+  user-select: none;
+}
+
+.cnt-mini-cal-day:hover:not(.empty):not(.disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.cnt-mini-cal-day.today::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-primary, #6366F1);
+}
+
+.cnt-mini-cal-day.selected {
+  background: var(--color-primary, #6366F1) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.4);
+}
+
+.cnt-mini-cal-day.selected::after {
+  background: #fff;
+}
+
+.cnt-mini-cal-day.other-month {
+  color: var(--text-muted);
+  opacity: 0.35;
+}
+
+.cnt-mini-cal-day.empty {
+  cursor: default;
+}
+
+/* Time Panel */
+.cnt-time-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 12px;
+}
+
+@media (max-width: 520px) {
+  .cnt-time-panel {
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    padding-left: 0;
+    padding-top: 10px;
+  }
+}
+
+.cnt-time-input {
+  width: 100%;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.cnt-time-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.cnt-time-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 4px 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs, 4px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.cnt-time-chip span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cnt-time-chip small {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.cnt-time-chip:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.cnt-time-chip.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: var(--color-primary, #6366F1);
+}
+
+.cnt-time-chip.active span {
+  color: var(--color-primary, #6366F1);
+}
+
+/* White calendar indicator for campaign modal date inputs */
+.mkt-date-input-white,
+#cmp-modal-start,
+#cmp-modal-end {
+  color-scheme: dark !important;
+}
+
+.mkt-date-input-white::-webkit-calendar-picker-indicator,
+#cmp-modal-start::-webkit-calendar-picker-indicator,
+#cmp-modal-end::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1) !important;
+  cursor: pointer;
+  opacity: 1 !important;
+}
+
+

@@ -1,0 +1,776 @@
+@import './variables.css';
+
+/* Global Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* App Shell Layout */
+#app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  position: relative;
+}
+
+.view-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-xl) var(--space-2xl);
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+h1 { font-size: 24px; line-height: 1.25; }
+h2 { font-size: 18px; line-height: 1.3; }
+h3 { font-size: 15px; line-height: 1.4; }
+
+p {
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Form Controls & Inputs */
+input, textarea, select {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--border-focus);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Date & Time Picker Controls (White Calendar Icon in Dark Mode) */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: transparent;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.btn-primary {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background-color: var(--bg-surface);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-ghost {
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn-danger {
+  color: var(--status-danger);
+  border-color: transparent;
+}
+
+.btn-danger:hover {
+  background-color: var(--status-danger-bg);
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-icon {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Badges & Tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.badge-active {
+  background-color: var(--status-active-bg);
+  color: var(--status-active);
+  border-color: transparent;
+}
+
+.badge-warning {
+  background-color: var(--status-warning-bg);
+  color: var(--status-warning);
+  border-color: transparent;
+}
+
+.badge-danger {
+  background-color: var(--status-danger-bg);
+  color: var(--status-danger);
+  border-color: transparent;
+}
+
+/* Empty States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) var(--space-md);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state svg {
+  width: 40px;
+  height: 40px;
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  margin-bottom: var(--space-md);
+}
+
+.empty-state h3 {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 360px;
+  margin-bottom: var(--space-md);
+}
+
+/* ========================================================
+   UNIFIED DESIGN SYSTEM FOUNDATION
+   Shared components for visual coherence across all pages
+   ======================================================== */
+
+/* 1. Page Hero Header */
+.app-page-hero,
+.web-header-hero,
+.dev-hero-header,
+.dev-header-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-xs);
+  gap: var(--space-md);
+  flex-shrink: 0;
+}
+
+.page-hero-left,
+.dev-header-left,
+.web-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.page-title-row,
+.dev-title-row,
+.web-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-title-row h1,
+.page-title-row h2,
+.web-title-row h1,
+.web-title-row h2,
+.dev-title-row h1,
+.dev-title-row h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-stats-badge,
+.dev-header-stats-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3.5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.page-stats-badge strong,
+.dev-header-stats-badge strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.page-subtitle,
+.web-subtitle,
+.dev-hero-desc,
+.dev-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.45;
+  max-width: 640px;
+}
+
+.page-hero-actions,
+.dev-header-actions,
+.web-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* 2. Subnav Navigation Tabs (Unified Segmented Pill Bar) */
+.nubo-nav-tabs,
+.brand-nav-tabs,
+.web-subnav-tabs,
+.dev-subnav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: var(--space-lg);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.nubo-tab-btn,
+.brand-tab-btn,
+.web-tab-item,
+.dev-tab-item,
+.web-subnav-tab,
+.dev-subnav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  height: 32px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.nubo-tab-btn:hover,
+.brand-tab-btn:hover,
+.web-tab-item:hover,
+.dev-tab-item:hover,
+.web-subnav-tab:hover,
+.dev-subnav-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.nubo-tab-btn.active,
+.brand-tab-btn.active,
+.web-tab-item.active,
+.dev-tab-item.active,
+.web-subnav-tab.active,
+.dev-subnav-tab.active {
+  color: var(--text-primary);
+  background-color: var(--bg-subtle);
+  border-color: var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+.nubo-tab-badge {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.nubo-tab-btn.active .nubo-tab-badge {
+  background: var(--accent-tint);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* 3. Unified Cards */
+.nubo-card,
+.dev-card,
+.web-section-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+}
+
+.nubo-card:hover,
+.dev-card:hover {
+  border-color: var(--border-strong);
+}
+
+.nubo-card-header,
+.dev-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: var(--space-md);
+}
+
+.nubo-card-title-group,
+.dev-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nubo-card-icon-bubble,
+.dev-card-icon-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-primary);
+}
+
+.nubo-card-title,
+.dev-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.nubo-card-subtitle,
+.dev-card-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 4. Unified Status Pills & Interactive Selectors */
+.dev-status-pill,
+.nubo-status-pill,
+.nubo-status-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: fit-content;
+  white-space: nowrap;
+}
+
+.nubo-status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  transition: all var(--transition-fast);
+  outline: none;
+  width: auto;
+  max-width: fit-content;
+}
+
+.nubo-status-select:hover {
+  border-color: var(--border-strong);
+  filter: brightness(1.08);
+}
+
+.nubo-status-select option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  padding: 6px 10px;
+}
+
+/* Custom Interactive Status Picker (Tight & Adaptive) */
+.nubo-status-dropdown {
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  max-width: fit-content;
+}
+
+.nubo-status-trigger {
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  width: fit-content;
+  max-width: fit-content;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.nubo-status-trigger:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.nubo-status-trigger svg {
+  opacity: 0.7;
+  transition: transform var(--transition-fast);
+  margin-left: 1px;
+}
+
+.nubo-status-dropdown.open .nubo-status-trigger svg {
+  transform: rotate(180deg);
+}
+
+.nubo-status-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  min-width: 140px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  z-index: 1000;
+}
+
+.nubo-status-dropdown.open .nubo-status-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: nuboFadeIn 0.15s ease;
+}
+
+.nubo-status-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nubo-status-option:hover {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.nubo-status-option.selected {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.status-option-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dev-status-pill.success,
+.nubo-status-pill.success,
+.nubo-status-select.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.dev-status-pill.warning,
+.nubo-status-pill.warning,
+.nubo-status-select.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.dev-status-pill.danger,
+.nubo-status-pill.danger,
+.nubo-status-select.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.dev-status-pill.info,
+.nubo-status-pill.info,
+.nubo-status-select.info {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3B82F6;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.dev-status-pill.neutral,
+.nubo-status-pill.neutral,
+.nubo-status-select.neutral {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* 5. Unified Search Box */
+.nubo-search-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  transition: all var(--transition-fast);
+}
+
+.nubo-search-box:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.nubo-search-box input {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: 12.5px;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.nubo-search-box svg {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* 6. Unified Filter Pills */
+.nubo-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nubo-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nubo-filter-pill:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.nubo-filter-pill.active {
+  background-color: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+
+.nubo-filter-pill.active .nubo-tab-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-inverse);
+}

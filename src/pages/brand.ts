@@ -349,6 +349,10 @@ export class BrandPage {
           ${icons.grid(14)}
           <span>Todo</span>
         </button>
+        <button class="brand-tab-btn ${curTab === 'tasks' ? 'active' : ''}" data-tab="tasks">
+          ${icons.columns(14)}
+          <span>${t('brand.tabTasks')} (${taskCounts.all})</span>
+        </button>
         <button class="brand-tab-btn ${curTab === 'master' ? 'active' : ''}" data-tab="master">
           <span style="font-weight: 800; font-size: 11px; color: #FF9A00; background: #261300; padding: 1px 4px; border-radius: 3px; border: 1px solid #FF9A00;">Ai</span>
           <span>Illustrator & Master</span>
@@ -380,10 +384,6 @@ export class BrandPage {
         <button class="brand-tab-btn ${curTab === 'files' ? 'active' : ''}" data-tab="files">
           ${icons.folder(14)}
           <span>Archivos (${brandFiles.length})</span>
-        </button>
-        <button class="brand-tab-btn ${curTab === 'tasks' ? 'active' : ''}" data-tab="tasks">
-          ${icons.columns(14)}
-          <span>${t('brand.tabTasks')} (${taskCounts.all})</span>
         </button>
       </div>
 
@@ -1373,6 +1373,23 @@ export class BrandPage {
         BrandPage.render(container);
       });
     });
+
+    // Horizontal wheel scrolling for brand navigation tabs
+    const brandTabsContainer = container.querySelector('.brand-nav-tabs') as HTMLElement;
+    if (brandTabsContainer) {
+      brandTabsContainer.addEventListener('wheel', (e: WheelEvent) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          brandTabsContainer.scrollLeft += e.deltaY;
+        }
+      }, { passive: false });
+
+      // Scroll active tab into view
+      const activeTabBtn = brandTabsContainer.querySelector('.brand-tab-btn.active') as HTMLElement;
+      if (activeTabBtn) {
+        activeTabBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+    }
 
     // Step navigation buttons and dots click
     container.querySelectorAll('.btn-step-nav, .step-dot').forEach(el => {

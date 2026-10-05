@@ -412,7 +412,8 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   margin-bottom: var(--space-lg);
   flex-shrink: 0;
   box-sizing: border-box;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .nubo-nav-tabs::-webkit-scrollbar,
@@ -420,7 +421,24 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-subnav-tabs::-webkit-scrollbar,
 .dev-subnav-tabs::-webkit-scrollbar,
 .mkt-subnav-bar::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.nubo-nav-tabs::-webkit-scrollbar-thumb,
+.brand-nav-tabs::-webkit-scrollbar-thumb,
+.web-subnav-tabs::-webkit-scrollbar-thumb,
+.dev-subnav-tabs::-webkit-scrollbar-thumb,
+.mkt-subnav-bar::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 4px;
+}
+
+.nubo-nav-tabs::-webkit-scrollbar-track,
+.brand-nav-tabs::-webkit-scrollbar-track,
+.web-subnav-tabs::-webkit-scrollbar-track,
+.dev-subnav-tabs::-webkit-scrollbar-track,
+.mkt-subnav-bar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .nubo-tab-btn,

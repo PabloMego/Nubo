@@ -111,6 +111,19 @@ El hogar de todo tu proyecto digital.
   // Ensure any tour overlay is cleared
   document.getElementById('onboarding-overlay')?.remove();
 
+  // Support mouse wheel horizontal scrolling on any tab pill bar
+  document.addEventListener('wheel', (e: WheelEvent) => {
+    const target = (e.target as HTMLElement)?.closest(
+      '.brand-nav-tabs, .nubo-nav-tabs, .web-subnav-tabs, .dev-subnav-tabs, .mkt-subnav-bar, .brand-files-filter-bar .brand-pills-group'
+    ) as HTMLElement;
+    if (target && target.scrollWidth > target.clientWidth) {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        target.scrollLeft += e.deltaY;
+      }
+    }
+  }, { passive: false });
+
   console.log('[Nubo] Application ready.');
 }
 

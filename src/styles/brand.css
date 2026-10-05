@@ -15,11 +15,21 @@
   margin-bottom: var(--space-lg);
   flex-shrink: 0;
   box-sizing: border-box;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .brand-nav-tabs::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.brand-nav-tabs::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 4px;
+}
+
+.brand-nav-tabs::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .brand-tab-btn {

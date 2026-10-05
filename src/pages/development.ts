@@ -2,12 +2,12 @@ import { icons } from '../scripts/icons';
 import { appStore } from '../scripts/store';
 import { modalManager } from '../components/modal';
 import { showToast } from '../components/toast';
-import { Task, ProductSpec, ProductFeature, GitStatusResult, GitHubAccount } from '../scripts/types';
+import { Task, ProductSpec, ProductFeature, GitStatusResult, GitHubAccount, DetectedBuildItem } from '../scripts/types';
 import { t, getLanguage } from '../scripts/i18n';
 
 export class DevelopmentPage {
-  // Navigation tab: 'all' (Todo) | 'code' (Código & Git) | 'kanban' (Tareas) | 'specs' (Especificaciones)
-  private static activeTab: 'all' | 'overview' | 'code' | 'kanban' | 'specs' = 'all';
+  // Navigation tab: 'all' (Todo) | 'code' (Código & Git) | 'kanban' (Tareas) | 'specs' (Especificaciones) | 'build' (Build & .exe)
+  private static activeTab: 'all' | 'overview' | 'code' | 'kanban' | 'specs' | 'build' = 'all';
 
   // Kanban view state
   private static viewMode: 'kanban' | 'list' = 'kanban';
@@ -18,16 +18,18 @@ export class DevelopmentPage {
   private static activeQuickAddCol: 'todo' | 'in_progress' | 'done' | null = null;
   private static draggedTaskId: string | null = null;
 
-  // Cached git and specs state
+  // Cached git, specs and builds state
   private static cachedGitStatus: GitStatusResult | null = null;
   private static cachedGitStatusFolder: string | null = null;
   private static cachedSpecs: ProductSpec | null = null;
+  private static cachedDetectedBuilds: DetectedBuildItem[] | null = null;
   private static isLoadingGit: boolean = false;
 
   public static clearCache(): void {
     DevelopmentPage.cachedGitStatus = null;
     DevelopmentPage.cachedGitStatusFolder = null;
     DevelopmentPage.cachedSpecs = null;
+    DevelopmentPage.cachedDetectedBuilds = null;
   }
 
   public static async render(container: HTMLElement): Promise<void> {
@@ -123,6 +125,20 @@ export class DevelopmentPage {
         DevelopmentPage.cachedGitStatusFolder = devCodePath;
       }
 
+      // Fetch detected builds if in all or build tab
+      let detectedBuilds = DevelopmentPage.cachedDetectedBuilds;
+      if ((DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'build') && !detectedBuilds && project.folder_path) {
+        try {
+          if (window.nubo?.development?.scanBuildExecutables) {
+            detectedBuilds = await window.nubo.development.scanBuildExecutables(project.folder_path);
+          }
+        } catch (err) {
+          console.warn('[DevelopmentPage] Error scanning builds:', err);
+        }
+        detectedBuilds = detectedBuilds || [];
+        DevelopmentPage.cachedDetectedBuilds = detectedBuilds;
+      }
+
       // Check if project folder exists on disk
       let folderExists = true;
       try {
@@ -190,20 +206,26 @@ export class DevelopmentPage {
               ${icons.fileText(14)}
               <span>${t('dev.tabSpecs') || 'Especificaciones'}</span>
             </button>
+            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'build' ? 'active' : ''}" data-dev-tab="build">
+              ${icons.package(14)}
+              <span>${t('dev.tabBuild') || 'Build & .exe'}</span>
+            </button>
           </div>
 
           <!-- TAB CONTENT -->
           ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview'
-            ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks, githubAccount)
+            ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks, githubAccount, detectedBuilds || [])
             : DevelopmentPage.activeTab === 'code'
             ? DevelopmentPage.renderCodeAndGit(project, settings, gitStatus, folderExists, githubAccount)
             : DevelopmentPage.activeTab === 'specs'
             ? DevelopmentPage.renderSpecifications(specs)
+            : DevelopmentPage.activeTab === 'build'
+            ? DevelopmentPage.renderBuildView(project, settings, specs, devCodePath, detectedBuilds || [])
             : DevelopmentPage.renderKanbanView(allTasks, counts, completionRate)}
         </div>
       `;
 
-      DevelopmentPage.bindEvents(container, project, allTasks, specs, settings);
+      DevelopmentPage.bindEvents(container, project, allTasks, specs, settings, detectedBuilds || []);
     } catch (err: any) {
       console.error('[DevelopmentPage] Render error:', err);
       container.innerHTML = `
@@ -598,7 +620,8 @@ export class DevelopmentPage {
     counts: { all: number; todo: number; in_progress: number; done: number },
     completionRate: number,
     allTasks: Task[],
-    githubAccount?: GitHubAccount | null
+    githubAccount?: GitHubAccount | null,
+    detectedBuilds: DetectedBuildItem[] = []
   ): string {
     const editor = settings.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' };
 
@@ -683,6 +706,69 @@ export class DevelopmentPage {
               <span class="specs-preview-label">${t('dev.specsGoals')}</span>
               <p class="specs-preview-val">${specs.goals || 'Sin especificar todavía.'}</p>
             </div>
+          </div>
+        </div>
+
+        <!-- 5. Sección Todo: Build & Programa Lanzado (.exe) -->
+        <div class="dev-all-section">
+          <div class="dev-all-section-header">
+            <div class="dev-all-section-title-group">
+              <div class="dev-card-icon-bubble" style="width: 34px; height: 34px; background: rgba(16, 185, 129, 0.08); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                ${icons.package(16)}
+              </div>
+              <div>
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0;">
+                  Build & Programa Lanzado (.exe)
+                </h3>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                  ${specs.build_info?.executablePath ? `Ejecutable vinculado: ${specs.build_info.executableName || 'App.exe'}` : 'Sin ejecutable vinculado todavía'}
+                </span>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-jump-build-tab">
+              ${icons.package(13)}
+              <span>Ver sección Build & .exe</span>
+            </button>
+          </div>
+
+          <div class="dev-build-summary-box">
+            ${specs.build_info?.executablePath ? `
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+                  <div style="width: 38px; height: 38px; border-radius: var(--radius-sm); background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    ${icons.play(16)}
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <strong style="font-size: 14px; color: var(--text-primary);">${specs.build_info.executableName || 'Programa.exe'}</strong>
+                      <span class="dev-status-pill success" style="font-size: 10px; padding: 1px 6px;">Listo</span>
+                      <span style="font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-secondary);">v${specs.build_info.version || '1.0.0'}</span>
+                    </div>
+                    <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; max-width: 500px;" title="${specs.build_info.executablePath}">${specs.build_info.executablePath}</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button class="btn btn-primary btn-sm" id="btn-quick-launch-exe" style="display: inline-flex; align-items: center; gap: 6px;">
+                    ${icons.play(13)}
+                    <span>Lanzar programa (.exe)</span>
+                  </button>
+                  <button class="btn btn-secondary btn-sm btn-icon" id="btn-quick-open-exe-folder" title="Abrir carpeta en el Explorador">
+                    ${icons.folder(13)}
+                  </button>
+                </div>
+              </div>
+            ` : `
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+                <div>
+                  <strong style="font-size: 13.5px; color: var(--text-primary); display: block; margin-bottom: 2px;">Compilación y Ejecutables (.exe)</strong>
+                  <span style="font-size: 12px; color: var(--text-secondary);">Vincula tu archivo ejecutable o instalador para lanzarlo directamente desde Nubo.</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-jump-build-tab-2" style="display: inline-flex; align-items: center; gap: 6px;">
+                  ${icons.plus(13)}
+                  <span>Configurar Build & .exe</span>
+                </button>
+              </div>
+            `}
           </div>
         </div>
       </div>
@@ -853,6 +939,336 @@ export class DevelopmentPage {
               <span class="specs-field-desc">${t('dev.specsGoalsDesc')}</span>
             </div>
             <textarea class="specs-textarea" id="spec-goals" placeholder="Ej: 1. Velocidad extrema en la gestión diaria. 2. Control total del código...">${specs.goals || ''}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // 3. RENDER VISTA DEDICADA "BUILD & .EXE"
+  // ==========================================
+  private static renderBuildView(
+    project: any,
+    settings: any,
+    specs: ProductSpec,
+    devCodePath: string,
+    detectedBuilds: DetectedBuildItem[] = []
+  ): string {
+    const buildInfo = specs.build_info || {};
+    const isExeLinked = Boolean(buildInfo.executablePath);
+
+    return `
+      <div class="dev-build-container">
+        <!-- 1. Header Hero de Build -->
+        <div class="dev-build-header">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0 0 4px 0;">
+              ${t('dev.buildTitle') || 'Build & Programa Lanzado (.exe)'}
+            </h2>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+              ${t('dev.buildSubtitle') || 'Lanza tu aplicación compilada, configura comandos de empaquetado y genera instaladores (.exe / .msi).'}
+            </p>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-scan-builds" style="display: inline-flex; align-items: center; gap: 6px;">
+              ${icons.refresh(13)}
+              <span>Escanear builds</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-save-build-config" style="display: inline-flex; align-items: center; gap: 6px;">
+              ${icons.check(14)}
+              <span>Guardar configuración</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dev-build-grid">
+          <!-- 2. Tarjeta Programa Lanzado / Ejecutable Principal -->
+          <div class="dev-card ${isExeLinked ? 'dev-card-highlight' : ''}">
+            <div class="dev-card-header">
+              <div class="dev-card-title-group">
+                <div class="dev-card-icon-bubble" style="background: rgba(16, 185, 129, 0.08); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2);">
+                  ${icons.play(18)}
+                </div>
+                <div>
+                  <h3 class="dev-card-title">Programa Lanzado / Ejecutable Principal</h3>
+                  <span class="dev-card-subtitle">Acceso directo para ejecutar la versión compilada de tu software</span>
+                </div>
+              </div>
+
+              ${isExeLinked ? `
+                <span class="dev-status-pill success">
+                  <span class="pulse-dot"></span>
+                  Ejecutable listo
+                </span>
+              ` : `
+                <span class="dev-status-pill neutral">Sin vincular</span>
+              `}
+            </div>
+
+            <div class="dev-card-body">
+              ${isExeLinked ? `
+                <div class="dev-exe-hero-box">
+                  <div class="dev-exe-hero-left">
+                    <div class="dev-exe-hero-icon">
+                      ${icons.package(26)}
+                    </div>
+                    <div class="dev-exe-hero-details">
+                      <div class="dev-exe-hero-title-row">
+                        <strong class="dev-exe-name">${buildInfo.executableName || 'Programa.exe'}</strong>
+                        <span class="dev-exe-version-badge">v${buildInfo.version || '1.0.0'}</span>
+                        <span class="dev-exe-type-badge">${(buildInfo.installerType || '').includes('NSIS') || (buildInfo.executableName || '').toLowerCase().includes('setup') ? 'Instalador' : 'Ejecutable'}</span>
+                      </div>
+                      <div class="dev-exe-path-row">
+                        <span class="dev-exe-path" title="${buildInfo.executablePath}">${buildInfo.executablePath}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="dev-exe-hero-actions">
+                    <button class="btn btn-primary" id="btn-launch-main-exe" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 10px 22px; font-size: 14px;">
+                      ${icons.play(16)}
+                      <span>Lanzar programa (.exe)</span>
+                    </button>
+                  </div>
+                </div>
+              ` : `
+                <div class="dev-empty-box" style="padding: 28px 20px; text-align: center; border: 1px dashed var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-app);">
+                  <div style="margin: 0 auto 12px auto; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border-subtle);">
+                    ${icons.package(22)}
+                  </div>
+                  <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0 0 6px 0;">No hay ningún ejecutable (.exe) vinculado</h4>
+                  <p style="font-size: 12.5px; color: var(--text-secondary); max-width: 460px; margin: 0 auto 16px auto;">
+                    Selecciona el archivo ejecutable o instalador de tu programa para poder lanzarlo con un solo clic, o fíjalo desde la lista de builds detectados.
+                  </p>
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary btn-sm" id="btn-browse-main-exe" style="display: inline-flex; align-items: center; gap: 6px;">
+                      ${icons.plus(13)}
+                      <span>Vincular archivo .exe o Instalador</span>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="btn-open-dev-build-folder" style="display: inline-flex; align-items: center; gap: 6px;">
+                      ${icons.folder(13)}
+                      <span>Abrir carpeta Development/Build</span>
+                    </button>
+                  </div>
+                </div>
+              `}
+            </div>
+
+            ${isExeLinked ? `
+              <div class="dev-card-footer">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button class="btn btn-secondary btn-sm" id="btn-open-main-exe-folder" style="display: inline-flex; align-items: center; gap: 6px;">
+                    ${icons.folder(13)}
+                    <span>Abrir carpeta</span>
+                  </button>
+                  <button class="btn btn-secondary btn-sm" id="btn-browse-main-exe" style="display: inline-flex; align-items: center; gap: 6px;">
+                    ${icons.edit(13)}
+                    <span>Cambiar ejecutable</span>
+                  </button>
+                </div>
+                <button class="btn btn-ghost btn-sm danger" id="btn-unlink-main-exe" style="display: inline-flex; align-items: center; gap: 5px;">
+                  ${icons.trash(12)}
+                  <span>Desvincular</span>
+                </button>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 3. Tarjeta Compilación & Creación de Instalador -->
+          <div class="dev-card">
+            <div class="dev-card-header">
+              <div class="dev-card-title-group">
+                <div class="dev-card-icon-bubble" style="background: rgba(245, 158, 11, 0.08); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2);">
+                  ${icons.terminal(18)}
+                </div>
+                <div>
+                  <h3 class="dev-card-title">Compilación & Creación de Instalador</h3>
+                  <span class="dev-card-subtitle">Flujo de empaquetado para generar ejecutables e instaladores distribuidos</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dev-card-body">
+              <div class="dev-build-form-grid">
+                <!-- Comando de Build -->
+                <div class="dev-build-form-field full-width">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin: 0;">
+                      Comando de compilación / empaquetado
+                    </label>
+                    <!-- Presets rápidos -->
+                    <div class="dev-build-presets" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                      <button type="button" class="btn btn-ghost btn-xs btn-preset-cmd" data-cmd="npm run build" style="font-size: 11px; padding: 2px 7px;">npm run build</button>
+                      <button type="button" class="btn btn-ghost btn-xs btn-preset-cmd" data-cmd="npx electron-builder --win" style="font-size: 11px; padding: 2px 7px;">Electron Builder</button>
+                      <button type="button" class="btn btn-ghost btn-xs btn-preset-cmd" data-cmd="cargo build --release" style="font-size: 11px; padding: 2px 7px;">Rust / Tauri</button>
+                      <button type="button" class="btn btn-ghost btn-xs btn-preset-cmd" data-cmd="pyinstaller --noconsole --onefile main.py" style="font-size: 11px; padding: 2px 7px;">PyInstaller</button>
+                    </div>
+                  </div>
+                  <div>
+                    <input type="text" class="form-input" id="build-cmd-input" value="${buildInfo.buildCommand || 'npm run build'}" placeholder="Ej: npm run build o npx electron-builder --win" style="font-family: var(--font-mono); font-size: 12.5px; width: 100%; box-sizing: border-box;" />
+                  </div>
+                </div>
+
+                <!-- Versión y Tipo de Instalador -->
+                <div class="dev-build-form-field">
+                  <label style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                    Versión del producto
+                  </label>
+                  <input type="text" class="form-input" id="build-version-input" value="${buildInfo.version || '1.0.0'}" placeholder="1.0.0" style="font-size: 12.5px; width: 100%; box-sizing: border-box;" />
+                </div>
+
+                <div class="dev-build-form-field">
+                  <label style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                    Tipo de instalador / Formato
+                  </label>
+                  <select class="form-input" id="build-installer-type-select" style="font-size: 12.5px; width: 100%; box-sizing: border-box;">
+                    <option value="Instalador NSIS / Setup.exe" ${(buildInfo.installerType || '').includes('NSIS') ? 'selected' : ''}>Instalador NSIS (Setup.exe con asistente)</option>
+                    <option value="Inno Setup (.exe)" ${(buildInfo.installerType || '').includes('Inno') ? 'selected' : ''}>Inno Setup (.exe)</option>
+                    <option value="Instalador MSI (.msi)" ${(buildInfo.installerType || '').includes('MSI') ? 'selected' : ''}>Instalador MSI (.msi para Windows)</option>
+                    <option value="Portable (.exe sin instalador)" ${(buildInfo.installerType || '').includes('Portable') ? 'selected' : ''}>Portable (.exe directo sin instalación)</option>
+                    <option value="ZIP comprimido (.zip)" ${(buildInfo.installerType || '').includes('ZIP') ? 'selected' : ''}>Paquete ZIP comprimido</option>
+                  </select>
+                </div>
+
+                <!-- Carpeta de salida -->
+                <div class="dev-build-form-field full-width">
+                  <label style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                    Carpeta de salida (dist / release / build)
+                  </label>
+                  <input type="text" class="form-input" id="build-output-dir-input" value="${buildInfo.outputDir || 'dist'}" placeholder="dist o Development/Build" style="font-size: 12.5px; width: 100%; box-sizing: border-box;" />
+                </div>
+
+                <!-- Notas de versión / Changelog -->
+                <div class="dev-build-form-field full-width">
+                  <label style="font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                    Notas de la versión / Changelog
+                  </label>
+                  <textarea class="specs-textarea" id="build-release-notes" placeholder="Novedades, mejoras y correcciones de esta versión..." style="min-height: 80px; width: 100%; box-sizing: border-box;">${buildInfo.releaseNotes || ''}</textarea>
+                </div>
+              </div>
+
+              <!-- Guía Rápida para Crear Instaladores -->
+              <div class="dev-installer-guide-section" style="margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 0 0 10px 0;">
+                  💡 Guía rápida para crear instaladores (.exe / .msi)
+                </h4>
+                <div class="dev-installer-guide-grid">
+                  <div class="installer-guide-card">
+                    <strong>Electron (electron-builder)</strong>
+                    <p>Genera un instalador NSIS (.exe) automático para Windows:</p>
+                    <code>npx electron-builder --win</code>
+                  </div>
+                  <div class="installer-guide-card">
+                    <strong>Inno Setup</strong>
+                    <p>Software gratuito para empaquetar cualquier carpeta o .exe en un instalador profesional con desinstalador:</p>
+                    <a href="https://jrsoftware.org/isinfo.php" target="_blank" style="color: var(--accent-primary); font-size: 11.5px; text-decoration: underline;">Descargar Inno Setup</a>
+                  </div>
+                  <div class="installer-guide-card">
+                    <strong>Python (PyInstaller)</strong>
+                    <p>Empaqueta un script de Python con dependencias en un ejecutable único:</p>
+                    <code>pyinstaller --noconsole --onefile app.py</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dev-card-footer">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-primary btn-sm" id="btn-open-build-terminal" style="display: inline-flex; align-items: center; gap: 6px;">
+                  ${icons.terminal(13)}
+                  <span>Abrir terminal para compilar</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-open-dist-folder" style="display: inline-flex; align-items: center; gap: 6px;">
+                  ${icons.folder(13)}
+                  <span>Abrir carpeta de salida</span>
+                </button>
+              </div>
+              <button class="btn btn-primary btn-sm" id="btn-save-build-config-bottom">
+                ${icons.check(13)}
+                <span>Guardar cambios</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Tarjeta Builds e Instaladores Detectados en Disco -->
+          <div class="dev-card">
+            <div class="dev-card-header">
+              <div class="dev-card-title-group">
+                <div class="dev-card-icon-bubble" style="background: rgba(14, 165, 233, 0.08); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.2);">
+                  ${icons.box(18)}
+                </div>
+                <div>
+                  <h3 class="dev-card-title">Builds e Instaladores Detectados en Disco (${detectedBuilds.length})</h3>
+                  <span class="dev-card-subtitle">Archivos ejecutables (.exe, .msi, .zip) encontrados en las carpetas de compilación</span>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm btn-icon" id="btn-refresh-builds-list" title="Volver a escanear disco">
+                ${icons.refresh(13)}
+              </button>
+            </div>
+
+            <div class="dev-card-body" style="padding: ${detectedBuilds.length > 0 ? '0' : '20px'};">
+              ${detectedBuilds.length > 0 ? `
+                <div class="dev-builds-table">
+                  ${detectedBuilds.map(b => `
+                    <div class="dev-build-row ${buildInfo.executablePath === b.path ? 'is-main-exe' : ''}">
+                      <div class="dev-build-left">
+                        <div class="dev-build-badge ${b.kind}">
+                          ${b.kind === 'installer' ? 'INSTALADOR' : b.kind === 'executable' ? 'EXE' : 'ZIP'}
+                        </div>
+                        <div class="dev-build-info">
+                          <div class="dev-build-name-row">
+                            <strong class="dev-build-file-name">${b.name}</strong>
+                            ${buildInfo.executablePath === b.path ? `
+                              <span class="dev-status-pill success" style="font-size: 10px; padding: 1px 6px;">Principal</span>
+                            ` : ''}
+                          </div>
+                          <div class="dev-build-meta-row">
+                            <span class="dev-build-folder-pill">${b.folder}</span>
+                            <span class="dev-build-dot">·</span>
+                            <span class="dev-build-size">${b.sizeFormatted}</span>
+                            <span class="dev-build-dot">·</span>
+                            <span class="dev-build-date">${new Date(b.modifiedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="dev-build-actions">
+                        <button class="btn btn-primary btn-xs btn-launch-detected-exe" data-path="${b.path}" style="display: inline-flex; align-items: center; gap: 5px;">
+                          ${icons.play(12)}
+                          <span>Lanzar</span>
+                        </button>
+                        <button class="btn btn-secondary btn-xs btn-open-detected-folder" data-path="${b.path}" title="Ver en el Explorador de Windows">
+                          ${icons.folder(12)}
+                          <span>Carpeta</span>
+                        </button>
+                        ${buildInfo.executablePath !== b.path ? `
+                          <button class="btn btn-ghost btn-xs btn-set-main-exe" data-path="${b.path}" data-name="${b.name}" title="Fijar como ejecutable principal de lanzamiento">
+                            ${icons.target(12)}
+                            <span>Fijar principal</span>
+                          </button>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <div class="dev-empty-box" style="padding: 24px; text-align: center; background: var(--bg-app); border-radius: var(--radius-md);">
+                  <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 10px 0;">
+                    No se han detectado archivos .exe en las carpetas habituales (dist, release, build).
+                  </p>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 14px 0;">
+                    Puedes compilar tu proyecto desde el botón superior o colocar manualmente el instalador en <code>Development/Build</code>.
+                  </p>
+                  <button class="btn btn-secondary btn-sm" id="btn-open-dev-build-folder-2">
+                    ${icons.folder(13)}
+                    <span>Abrir carpeta Development/Build</span>
+                  </button>
+                </div>
+              `}
+            </div>
           </div>
         </div>
       </div>
@@ -1201,7 +1617,8 @@ export class DevelopmentPage {
     project: any,
     tasks: Task[],
     specs: ProductSpec,
-    settings: any
+    settings: any,
+    detectedBuilds: DetectedBuildItem[] = []
   ): void {
     const devCodePath = project.folder_path ? `${project.folder_path}\\Development\\Proyecto` : '';
 
@@ -1232,6 +1649,34 @@ export class DevelopmentPage {
     container.querySelector('#btn-open-full-specs')?.addEventListener('click', () => {
       DevelopmentPage.activeTab = 'specs';
       DevelopmentPage.render(container);
+    });
+
+    container.querySelector('#btn-jump-build-tab')?.addEventListener('click', () => {
+      DevelopmentPage.activeTab = 'build';
+      DevelopmentPage.render(container);
+    });
+
+    container.querySelector('#btn-jump-build-tab-2')?.addEventListener('click', () => {
+      DevelopmentPage.activeTab = 'build';
+      DevelopmentPage.render(container);
+    });
+
+    // Quick launch from All view
+    container.querySelector('#btn-quick-launch-exe')?.addEventListener('click', async () => {
+      if (specs.build_info?.executablePath) {
+        try {
+          showToast(`Iniciando ${specs.build_info.executableName || 'programa'}...`);
+          await window.nubo.files.openFile(specs.build_info.executablePath);
+        } catch (err: any) {
+          alert('Error al lanzar el ejecutable: ' + (err.message || err));
+        }
+      }
+    });
+
+    container.querySelector('#btn-quick-open-exe-folder')?.addEventListener('click', async () => {
+      if (specs.build_info?.executablePath) {
+        await window.nubo.files.openContainingFolder(specs.build_info.executablePath);
+      }
     });
 
     // --- OVERVIEW / ALL / CODE TAB ACTIONS ---
@@ -1578,6 +2023,209 @@ export class DevelopmentPage {
           saveBtn.disabled = false;
           saveBtn.innerHTML = originalHtml;
         }
+      });
+    }
+
+    // --- BUILD TAB ACTIONS ---
+    if (DevelopmentPage.activeTab === 'build') {
+      // 1. Launch Main Executable
+      container.querySelector('#btn-launch-main-exe')?.addEventListener('click', async () => {
+        if (specs.build_info?.executablePath) {
+          try {
+            showToast(`Iniciando ${specs.build_info.executableName || 'programa'}...`);
+            await window.nubo.files.openFile(specs.build_info.executablePath);
+          } catch (err: any) {
+            alert('Error al lanzar el ejecutable: ' + (err.message || err));
+          }
+        }
+      });
+
+      // 2. Open Main Executable Folder
+      container.querySelector('#btn-open-main-exe-folder')?.addEventListener('click', async () => {
+        if (specs.build_info?.executablePath) {
+          await window.nubo.files.openContainingFolder(specs.build_info.executablePath);
+        }
+      });
+
+      // 3. Browse / Link Main Executable
+      container.querySelectorAll('#btn-browse-main-exe').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          try {
+            const files = await window.nubo.dialog.openFiles({
+              title: 'Seleccionar archivo ejecutable o instalador',
+              filters: [
+                { name: 'Ejecutables e Instaladores (*.exe, *.msi)', extensions: ['exe', 'msi'] },
+                { name: 'Todos los archivos (*.*)', extensions: ['*'] }
+              ]
+            });
+            if (files && files.length > 0) {
+              const selectedPath = files[0];
+              const fileName = selectedPath.split('\\').pop() || selectedPath.split('/').pop() || 'App.exe';
+              const updatedBuildInfo = {
+                ...(specs.build_info || {}),
+                executablePath: selectedPath,
+                executableName: fileName
+              };
+              const updated = await window.nubo.development.updateSpecs(project.id, { build_info: updatedBuildInfo });
+              DevelopmentPage.cachedSpecs = updated;
+              showToast(`Ejecutable "${fileName}" vinculado con éxito.`);
+              DevelopmentPage.render(container);
+            }
+          } catch (err: any) {
+            console.error('Error seleccionando ejecutable:', err);
+          }
+        });
+      });
+
+      // 4. Unlink Main Executable
+      container.querySelector('#btn-unlink-main-exe')?.addEventListener('click', async () => {
+        if (confirm('¿Desvincular este archivo ejecutable del proyecto?')) {
+          const updatedBuildInfo = {
+            ...(specs.build_info || {}),
+            executablePath: undefined,
+            executableName: undefined
+          };
+          const updated = await window.nubo.development.updateSpecs(project.id, { build_info: updatedBuildInfo });
+          DevelopmentPage.cachedSpecs = updated;
+          showToast('Ejecutable desvinculado.');
+          DevelopmentPage.render(container);
+        }
+      });
+
+      // 5. Open Development/Build Folder
+      const openDevBuildFolder = async () => {
+        const buildPath = `${project.folder_path}\\Development\\Build`;
+        try {
+          if (window.nubo?.development?.ensureFolders) {
+            await window.nubo.development.ensureFolders(project.folder_path);
+          }
+          await window.nubo.development.openFolder(buildPath);
+        } catch {
+          await window.nubo.development.openFolder(project.folder_path);
+        }
+      };
+      container.querySelector('#btn-open-dev-build-folder')?.addEventListener('click', openDevBuildFolder);
+      container.querySelector('#btn-open-dev-build-folder-2')?.addEventListener('click', openDevBuildFolder);
+
+      // 6. Save Build Configuration
+      const saveBuildConfig = async () => {
+        const cmdInput = container.querySelector('#build-cmd-input') as HTMLInputElement | null;
+        const verInput = container.querySelector('#build-version-input') as HTMLInputElement | null;
+        const typeSelect = container.querySelector('#build-installer-type-select') as HTMLSelectElement | null;
+        const outInput = container.querySelector('#build-output-dir-input') as HTMLInputElement | null;
+        const notesText = container.querySelector('#build-release-notes') as HTMLTextAreaElement | null;
+
+        const updatedBuildInfo = {
+          ...(specs.build_info || {}),
+          buildCommand: cmdInput?.value.trim() || 'npm run build',
+          version: verInput?.value.trim() || '1.0.0',
+          installerType: typeSelect?.value || 'Instalador NSIS / Setup.exe',
+          outputDir: outInput?.value.trim() || 'dist',
+          releaseNotes: notesText?.value || '',
+          lastBuiltAt: new Date().toISOString()
+        };
+
+        const updated = await window.nubo.development.updateSpecs(project.id, { build_info: updatedBuildInfo });
+        DevelopmentPage.cachedSpecs = updated;
+        showToast('Configuración de compilación guardada.');
+      };
+
+      container.querySelector('#btn-save-build-config')?.addEventListener('click', saveBuildConfig);
+      container.querySelector('#btn-save-build-config-bottom')?.addEventListener('click', saveBuildConfig);
+
+      // 7. Preset Command Buttons
+      container.querySelectorAll('.btn-preset-cmd').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cmd = btn.getAttribute('data-cmd');
+          const input = container.querySelector('#build-cmd-input') as HTMLInputElement | null;
+          if (cmd && input) {
+            input.value = cmd;
+            showToast(`Comando seleccionado: ${cmd}`);
+          }
+        });
+      });
+
+      // 8. Open Terminal for Building
+      container.querySelector('#btn-open-build-terminal')?.addEventListener('click', async () => {
+        const cmd = (container.querySelector('#build-cmd-input') as HTMLInputElement | null)?.value || specs.build_info?.buildCommand || 'npm run build';
+        const res = await window.nubo.development.openTerminal(devCodePath);
+        if (res.success) {
+          showToast(`Terminal abierto en Proyecto. Ejecuta: "${cmd}"`, 'info');
+        } else {
+          alert(res.error || 'Error al abrir terminal.');
+        }
+      });
+
+      // 9. Open Output Folder (dist / release / build)
+      container.querySelector('#btn-open-dist-folder')?.addEventListener('click', async () => {
+        const outDir = (container.querySelector('#build-output-dir-input') as HTMLInputElement | null)?.value || specs.build_info?.outputDir || 'dist';
+        let targetFolder = `${devCodePath}\\${outDir}`;
+        const check = await window.nubo.development.checkFolder(targetFolder);
+        if (!check.exists) {
+          targetFolder = `${project.folder_path}\\Development\\Build`;
+        }
+        await window.nubo.development.openFolder(targetFolder);
+      });
+
+      // 10. Refresh Builds List
+      const refreshBuilds = async () => {
+        showToast('Escaneando ejecutables e instaladores en disco...');
+        try {
+          if (window.nubo?.development?.scanBuildExecutables) {
+            DevelopmentPage.cachedDetectedBuilds = await window.nubo.development.scanBuildExecutables(project.folder_path);
+          }
+          DevelopmentPage.render(container);
+        } catch (err: any) {
+          console.error('Error scanning builds:', err);
+        }
+      };
+      container.querySelector('#btn-scan-builds')?.addEventListener('click', refreshBuilds);
+      container.querySelector('#btn-refresh-builds-list')?.addEventListener('click', refreshBuilds);
+
+      // 11. Detected Build Item Actions
+      container.querySelectorAll('.btn-launch-detected-exe').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const exePath = btn.getAttribute('data-path');
+          if (exePath) {
+            try {
+              const name = exePath.split('\\').pop() || 'programa';
+              showToast(`Lanzando ${name}...`);
+              await window.nubo.files.openFile(exePath);
+            } catch (err: any) {
+              alert('Error al lanzar archivo: ' + (err.message || err));
+            }
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-open-detected-folder').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const exePath = btn.getAttribute('data-path');
+          if (exePath) {
+            await window.nubo.files.openContainingFolder(exePath);
+          }
+        });
+      });
+
+      container.querySelectorAll('.btn-set-main-exe').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const exePath = btn.getAttribute('data-path');
+          const exeName = btn.getAttribute('data-name');
+          if (exePath && exeName) {
+            const updatedBuildInfo = {
+              ...(specs.build_info || {}),
+              executablePath: exePath,
+              executableName: exeName
+            };
+            const updated = await window.nubo.development.updateSpecs(project.id, { build_info: updatedBuildInfo });
+            DevelopmentPage.cachedSpecs = updated;
+            showToast(`"${exeName}" fijado como ejecutable principal.`);
+            DevelopmentPage.render(container);
+          }
+        });
       });
     }
 

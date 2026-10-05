@@ -474,6 +474,10 @@ export function registerIpcHandlers(): void {
     return developmentService.openGitHub(url);
   });
 
+  ipcMain.handle('nubo:development:scanBuildExecutables', async (_, folderPath: string) => {
+    return developmentService.scanBuildExecutables(folderPath);
+  });
+
   // === Window Controls ===
   ipcMain.handle('nubo:window:minimize', (event) => {
     const win = BrowserWindow.fromWebContents(event.sender);

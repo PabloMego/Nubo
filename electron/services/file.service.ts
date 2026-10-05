@@ -45,6 +45,7 @@ export class FileService {
       path.join('Content', 'Media'),
       'Development',
       path.join('Development', 'Proyecto'),
+      path.join('Development', 'Build'),
       'Files',
       'Notes'
     ];

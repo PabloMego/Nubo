@@ -117,7 +117,8 @@ const nuboApi = {
     gitPull: (folderPath: string) => ipcRenderer.invoke('nubo:development:gitPull', folderPath),
     gitDisconnectRemote: (folderPath: string) => ipcRenderer.invoke('nubo:development:gitDisconnectRemote', folderPath),
     gitRemoveRepo: (folderPath: string) => ipcRenderer.invoke('nubo:development:gitRemoveRepo', folderPath),
-    openGitHub: (url: string) => ipcRenderer.invoke('nubo:development:openGitHub', url)
+    openGitHub: (url: string) => ipcRenderer.invoke('nubo:development:openGitHub', url),
+    scanBuildExecutables: (folderPath: string) => ipcRenderer.invoke('nubo:development:scanBuildExecutables', folderPath)
   },
   window: {
     minimize: () => ipcRenderer.invoke('nubo:window:minimize'),

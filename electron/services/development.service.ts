@@ -15,6 +15,27 @@ export interface ProductFeature {
   taskId?: string; // Linked Kanban task id
 }
 
+export interface BuildInfo {
+  executablePath?: string;
+  executableName?: string;
+  version?: string;
+  buildCommand?: string;
+  installerType?: string;
+  outputDir?: string;
+  releaseNotes?: string;
+  lastBuiltAt?: string;
+}
+
+export interface DetectedBuildItem {
+  name: string;
+  path: string;
+  size: number;
+  sizeFormatted: string;
+  modifiedAt: string;
+  kind: 'installer' | 'executable' | 'package';
+  folder: string;
+}
+
 export interface ProductSpec {
   id: string;
   project_id: string;
@@ -25,6 +46,7 @@ export interface ProductSpec {
   features: ProductFeature[];
   user_flows: string;
   general_requirements: string;
+  build_info?: BuildInfo;
   created_at: string;
   updated_at: string;
 }
@@ -89,9 +111,21 @@ export class DevelopmentService {
     const existing = db.get<any>('SELECT * FROM product_specs WHERE project_id = ?', [projectId]);
 
     if (existing) {
+      let buildInfo: BuildInfo | undefined;
+      try {
+        if (existing.build_info_json) {
+          buildInfo = typeof existing.build_info_json === 'string'
+            ? JSON.parse(existing.build_info_json)
+            : existing.build_info_json;
+        }
+      } catch {
+        buildInfo = undefined;
+      }
+
       return {
         ...existing,
-        features: typeof existing.features_json === 'string' ? JSON.parse(existing.features_json || '[]') : (existing.features_json || [])
+        features: typeof existing.features_json === 'string' ? JSON.parse(existing.features_json || '[]') : (existing.features_json || []),
+        build_info: buildInfo || {}
       };
     }
 
@@ -110,13 +144,19 @@ export class DevelopmentService {
       features: [],
       user_flows: '',
       general_requirements: '',
+      build_info: {
+        version: '1.0.0',
+        buildCommand: 'npm run build',
+        installerType: 'Instalador NSIS / Setup.exe',
+        outputDir: 'dist'
+      },
       created_at: now,
       updated_at: now
     };
 
     db.run(`
-      INSERT INTO product_specs (id, project_id, what_is_it, problem_solved, target_audience, goals, features_json, user_flows, general_requirements, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO product_specs (id, project_id, what_is_it, problem_solved, target_audience, goals, features_json, user_flows, general_requirements, build_info_json, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       starterSpec.id,
       starterSpec.project_id,
@@ -127,6 +167,7 @@ export class DevelopmentService {
       JSON.stringify(starterSpec.features),
       starterSpec.user_flows,
       starterSpec.general_requirements,
+      JSON.stringify(starterSpec.build_info || {}),
       starterSpec.created_at,
       starterSpec.updated_at
     ]);
@@ -148,12 +189,13 @@ export class DevelopmentService {
       features: updates.features !== undefined ? updates.features : (current.features || []),
       user_flows: updates.user_flows !== undefined ? updates.user_flows : (current.user_flows || ''),
       general_requirements: updates.general_requirements !== undefined ? updates.general_requirements : (current.general_requirements || ''),
+      build_info: updates.build_info !== undefined ? { ...(current.build_info || {}), ...updates.build_info } : (current.build_info || {}),
       updated_at: now
     };
 
     db.run(`
       UPDATE product_specs
-      SET what_is_it = ?, problem_solved = ?, target_audience = ?, goals = ?, features_json = ?, user_flows = ?, general_requirements = ?, updated_at = ?
+      SET what_is_it = ?, problem_solved = ?, target_audience = ?, goals = ?, features_json = ?, user_flows = ?, general_requirements = ?, build_info_json = ?, updated_at = ?
       WHERE project_id = ?
     `, [
       updated.what_is_it,
@@ -163,6 +205,7 @@ export class DevelopmentService {
       JSON.stringify(updated.features),
       updated.user_flows,
       updated.general_requirements,
+      JSON.stringify(updated.build_info || {}),
       updated.updated_at,
       projectId
     ]);
@@ -201,13 +244,119 @@ export class DevelopmentService {
         fs.mkdirSync(projectFolder, { recursive: true });
       }
 
+      // Ensure Build folder inside Development exists for compiled binaries & installers
+      const buildFolder = path.join(devFolder, 'Build');
+      if (!fs.existsSync(buildFolder)) {
+        fs.mkdirSync(buildFolder, { recursive: true });
+      }
+
       // Ensure full project structure
       this.fileService.createProjectFolderStructure(norm);
 
-      return { success: true, path: norm, folders: ['Development', 'Development/Proyecto'] };
+      return { success: true, path: norm, folders: ['Development', 'Development/Proyecto', 'Development/Build'] };
     } catch (err: any) {
       console.error('[DevelopmentService] Error ensuring development folders:', err);
       return { success: false, path: folderPath, folders: [] };
+    }
+  }
+
+  public scanBuildExecutables(folderPath: string): DetectedBuildItem[] {
+    try {
+      const norm = path.normalize(folderPath);
+      if (!fs.existsSync(norm)) return [];
+
+      let projectRoot = norm;
+      const lower = norm.toLowerCase();
+      if (lower.endsWith(path.sep + 'development' + path.sep + 'proyecto') || lower.endsWith('/development/proyecto') || lower.endsWith('\\development\\proyecto')) {
+        projectRoot = path.dirname(path.dirname(norm));
+      } else if (lower.endsWith(path.sep + 'development') || lower.endsWith('/development') || lower.endsWith('\\development')) {
+        projectRoot = path.dirname(norm);
+      }
+
+      const searchDirs: { dir: string; label: string }[] = [
+        { dir: path.join(projectRoot, 'Development', 'Build'), label: 'Development/Build' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'dist'), label: 'dist' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'release'), label: 'release' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'build'), label: 'build' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'bin'), label: 'bin' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'out'), label: 'out' },
+        { dir: path.join(projectRoot, 'Development', 'Proyecto', 'target', 'release'), label: 'target/release' },
+        { dir: path.join(projectRoot, 'dist'), label: 'dist' },
+        { dir: path.join(projectRoot, 'build'), label: 'build' },
+        { dir: path.join(projectRoot, 'release'), label: 'release' }
+      ];
+
+      const foundItems: DetectedBuildItem[] = [];
+      const seenPaths = new Set<string>();
+
+      const formatSize = (bytes: number): string => {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      };
+
+      const checkFile = (filePath: string, label: string) => {
+        try {
+          const normFile = path.normalize(filePath);
+          if (seenPaths.has(normFile.toLowerCase())) return;
+          const ext = path.extname(normFile).toLowerCase();
+          if (!['.exe', '.msi', '.zip', '.appimage', '.dmg'].includes(ext)) return;
+
+          const stats = fs.statSync(normFile);
+          if (stats.isDirectory()) return;
+
+          const name = path.basename(normFile);
+          const lowerName = name.toLowerCase();
+
+          let kind: 'installer' | 'executable' | 'package' = 'executable';
+          if (ext === '.msi' || lowerName.includes('setup') || lowerName.includes('installer') || lowerName.includes('install')) {
+            kind = 'installer';
+          } else if (['.zip', '.tar.gz', '.tgz'].includes(ext)) {
+            kind = 'package';
+          }
+
+          seenPaths.add(normFile.toLowerCase());
+          foundItems.push({
+            name,
+            path: normFile,
+            size: stats.size,
+            sizeFormatted: formatSize(stats.size),
+            modifiedAt: stats.mtime.toISOString(),
+            kind,
+            folder: label
+          });
+        } catch {}
+      };
+
+      for (const item of searchDirs) {
+        if (fs.existsSync(item.dir)) {
+          try {
+            const entries = fs.readdirSync(item.dir, { withFileTypes: true });
+            for (const ent of entries) {
+              const fullEntryPath = path.join(item.dir, ent.name);
+              if (ent.isFile()) {
+                checkFile(fullEntryPath, item.label);
+              } else if (ent.isDirectory() && !ent.name.startsWith('.') && ent.name !== 'node_modules') {
+                try {
+                  const subEntries = fs.readdirSync(fullEntryPath, { withFileTypes: true });
+                  for (const sub of subEntries) {
+                    if (sub.isFile()) {
+                      checkFile(path.join(fullEntryPath, sub.name), `${item.label}/${ent.name}`);
+                    }
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+        }
+      }
+
+      return foundItems.sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime());
+    } catch (err) {
+      console.error('[DevelopmentService] Error scanning build executables:', err);
+      return [];
     }
   }
 

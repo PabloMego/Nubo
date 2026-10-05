@@ -369,6 +369,7 @@ export class DatabaseService {
         features_json TEXT DEFAULT '[]',
         user_flows TEXT DEFAULT '',
         general_requirements TEXT DEFAULT '',
+        build_info_json TEXT DEFAULT '{}',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -430,6 +431,18 @@ export class DatabaseService {
     ];
 
     for (const sql of marketingMigrations) {
+      try {
+        this.db.run(sql);
+      } catch {
+        // column already exists
+      }
+    }
+
+    const devMigrations = [
+      'ALTER TABLE product_specs ADD COLUMN build_info_json TEXT DEFAULT "{}"'
+    ];
+
+    for (const sql of devMigrations) {
       try {
         this.db.run(sql);
       } catch {

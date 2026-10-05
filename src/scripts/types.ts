@@ -277,6 +277,27 @@ export interface ProductFeature {
   taskId?: string;
 }
 
+export interface BuildInfo {
+  executablePath?: string;
+  executableName?: string;
+  version?: string;
+  buildCommand?: string;
+  installerType?: string;
+  outputDir?: string;
+  releaseNotes?: string;
+  lastBuiltAt?: string;
+}
+
+export interface DetectedBuildItem {
+  name: string;
+  path: string;
+  size: number;
+  sizeFormatted: string;
+  modifiedAt: string;
+  kind: 'installer' | 'executable' | 'package';
+  folder: string;
+}
+
 export interface ProductSpec {
   id: string;
   project_id: string;
@@ -287,6 +308,7 @@ export interface ProductSpec {
   features: ProductFeature[];
   user_flows?: string;
   general_requirements?: string;
+  build_info?: BuildInfo;
   created_at: string;
   updated_at: string;
 }
@@ -472,6 +494,7 @@ declare global {
         gitDisconnectRemote(folderPath: string): Promise<{ success: boolean; message: string }>;
         gitRemoveRepo(folderPath: string): Promise<{ success: boolean; message: string }>;
         openGitHub(url: string): Promise<boolean>;
+        scanBuildExecutables(folderPath: string): Promise<DetectedBuildItem[]>;
       };
       window?: {
         minimize(): Promise<void>;

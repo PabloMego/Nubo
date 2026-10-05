@@ -653,6 +653,12 @@ export function installBrowserFallback(): void {
                 target_audience: '',
                 goals: '',
                 features: [],
+                build_info: {
+                  version: '1.0.0',
+                  buildCommand: 'npm run build',
+                  installerType: 'Instalador NSIS / Setup.exe',
+                  outputDir: 'dist'
+                },
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               };
@@ -669,6 +675,7 @@ export function installBrowserFallback(): void {
             target_audience: '',
             goals: '',
             features: [],
+            build_info: {},
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           };
@@ -679,6 +686,7 @@ export function installBrowserFallback(): void {
             target_audience: updates.target_audience !== undefined ? updates.target_audience : current.target_audience,
             goals: updates.goals !== undefined ? updates.goals : current.goals,
             features: updates.features !== undefined ? updates.features : current.features,
+            build_info: updates.build_info !== undefined ? { ...(current.build_info || {}), ...updates.build_info } : current.build_info,
             updated_at: new Date().toISOString()
           };
           demoSpecsStore[projectId] = updated;
@@ -686,7 +694,7 @@ export function installBrowserFallback(): void {
         },
         checkFolder: async (folderPath: string) => ({ exists: true, path: folderPath }),
         createFolder: async (folderPath: string) => ({ success: true, path: folderPath }),
-        ensureFolders: async (folderPath: string) => ({ success: true, path: folderPath, folders: ['Development', 'Development/Specs', 'Development/Docs', 'src'] }),
+        ensureFolders: async (folderPath: string) => ({ success: true, path: folderPath, folders: ['Development', 'Development/Specs', 'Development/Docs', 'Development/Build', 'src'] }),
         openFolder: async (folderPath: string) => true,
         openTerminal: async (folderPath: string) => ({ success: true }),
         openInEditor: async (folderPath: string, cmd?: string) => ({ success: true, commandUsed: cmd || 'code' }),
@@ -711,6 +719,28 @@ export function installBrowserFallback(): void {
         openGitHub: async (url: string) => {
           window.open(url, '_blank');
           return true;
+        },
+        scanBuildExecutables: async (folderPath: string) => {
+          return [
+            {
+              name: 'App-Setup-1.0.0.exe',
+              path: folderPath + '\\dist\\App-Setup-1.0.0.exe',
+              size: 78500000,
+              sizeFormatted: '74.8 MB',
+              modifiedAt: new Date().toISOString(),
+              kind: 'installer' as const,
+              folder: 'dist'
+            },
+            {
+              name: 'App.exe',
+              path: folderPath + '\\dist\\win-unpacked\\App.exe',
+              size: 145000000,
+              sizeFormatted: '138.2 MB',
+              modifiedAt: new Date().toISOString(),
+              kind: 'executable' as const,
+              folder: 'dist/win-unpacked'
+            }
+          ];
         }
       }
     };

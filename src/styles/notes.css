@@ -1,17 +1,17 @@
-/* Notes View Styles */
+/* Notes View Styles (Notion Document Style) */
 .notes-container {
   display: flex;
-  height: calc(100vh - var(--header-height) - 150px);
+  height: calc(100vh - var(--header-height) - 130px);
   min-height: 480px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md, 6px);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 .notes-sidebar {
-  width: 300px;
+  width: 270px;
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -20,10 +20,10 @@
 }
 
 .notes-sidebar-header {
-  padding: 12px 14px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -36,20 +36,20 @@
 .notes-list {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-xs);
+  padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .note-item {
-  padding: 11px 13px;
-  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm, 4px);
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   border: 1px solid transparent;
 }
 
@@ -60,12 +60,12 @@
 .note-item.active {
   background-color: var(--bg-surface);
   border-color: var(--border-subtle);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .note-item-title {
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 550;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -74,7 +74,7 @@
 
 .note-item-preview {
   font-size: 11.5px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -89,7 +89,7 @@
 }
 
 .note-editor-header {
-  padding: 14px 20px;
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,12 +97,13 @@
 }
 
 .note-title-input {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
   border: none !important;
   background: transparent !important;
   color: var(--text-primary);
-  width: 60%;
+  width: 70%;
   padding: 0 !important;
   box-shadow: none !important;
   outline: none !important;
@@ -112,11 +113,13 @@
   flex: 1;
   border: none !important;
   background: transparent !important;
-  padding: 20px;
+  padding: 24px;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-primary);
   resize: none;
   box-shadow: none !important;
   outline: none !important;
+  font-family: inherit;
 }
+

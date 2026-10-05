@@ -1,7 +1,12 @@
+/* ==========================================================================
+   NOTION-STYLE SIDEBAR
+   Minimal, refined, collapsible workspace navigation
+   ========================================================================== */
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100%;
-  background-color: var(--bg-surface);
+  background-color: var(--bg-sidebar);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -9,33 +14,43 @@
   transition: width var(--transition-normal);
   position: relative;
   z-index: 10;
+  box-sizing: border-box;
 }
 
 .sidebar.collapsed {
   width: var(--sidebar-collapsed-width);
 }
 
+/* Sidebar Top Header */
 .sidebar-header {
   height: var(--header-height);
-  padding: 0 var(--space-md);
+  padding: 0 10px 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
   -webkit-app-region: drag;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .brand-title {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  font-weight: 700;
-  font-size: 15px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13.5px;
   color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   cursor: pointer;
   -webkit-app-region: no-drag;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.brand-title:hover {
+  background-color: var(--bg-hover);
 }
 
 .sidebar-header .btn {
@@ -43,80 +58,97 @@
 }
 
 .brand-icon {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
+  flex-shrink: 0;
 }
 
 .sidebar.collapsed .brand-title span,
 .sidebar.collapsed .sidebar-section-title,
 .sidebar.collapsed .nav-item span,
 .sidebar.collapsed .project-item-name,
-.sidebar.collapsed .btn-new-project span {
+.sidebar.collapsed .btn-new-project span,
+.sidebar.collapsed .sidebar-active-proj-name {
   display: none;
 }
 
+/* Sidebar Scrollable Body */
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-md) var(--space-sm);
+  overflow-x: hidden;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 12px;
 }
 
 .sidebar-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1.5px;
 }
 
 .sidebar-section-title {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
-  padding: var(--space-xs) var(--space-sm);
-  margin-bottom: 2px;
+  padding: 6px 8px 3px 8px;
+  user-select: none;
 }
 
+/* New Project Button (Notion "+ New page" style) */
 .btn-new-project {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 7px var(--space-sm);
-  margin-bottom: var(--space-xs);
-  background-color: var(--bg-subtle);
-  color: var(--text-primary);
+  gap: 7px;
+  padding: 5px 8px;
+  margin: 1px 0 3px 0;
+  background-color: transparent;
+  color: var(--text-secondary);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 12.5px;
+  font-weight: 450;
   cursor: pointer;
   transition: all var(--transition-fast);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .btn-new-project:hover {
   background-color: var(--bg-hover);
-  border-color: var(--text-primary);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
 }
 
+.btn-new-project svg {
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+/* Notion Navigation Items */
 .nav-item, .project-nav-item {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: 6px var(--space-sm);
+  gap: 8px;
+  padding: 5px 8px;
   border-radius: var(--radius-sm);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 13.5px;
+  font-weight: 450;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
   text-decoration: none;
   position: relative;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .nav-item:hover, .project-nav-item:hover {
@@ -127,23 +159,76 @@
 .nav-item.active, .project-nav-item.active {
   background-color: var(--bg-active);
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 550;
 }
 
 .nav-item svg, .project-nav-item svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity var(--transition-fast);
+}
+
+.nav-item:hover svg, .nav-item.active svg,
+.project-nav-item:hover svg, .project-nav-item.active svg {
+  opacity: 1;
+}
+
+/* Active Project Header inside Sidebar */
+.sidebar-active-proj-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  margin-bottom: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-active-proj-header:hover {
+  background: var(--bg-hover);
+}
+
+.sidebar-active-proj-logo {
   width: 16px;
   height: 16px;
+  border-radius: var(--radius-xs);
+  object-fit: contain;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  display: block;
+}
+
+.sidebar-active-proj-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
+.sidebar-active-proj-name {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Project Badge in Project List */
 .project-icon-badge {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
   background-color: var(--bg-surface-elevated, var(--bg-subtle));
   color: var(--text-primary);
@@ -160,68 +245,33 @@
   display: block;
 }
 
-.sidebar-active-proj-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px var(--space-sm);
-  margin-bottom: 2px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-subtle);
-}
-
-.sidebar-active-proj-logo {
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-xs);
-  object-fit: contain;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  flex-shrink: 0;
-  display: block;
-}
-
-.sidebar-active-proj-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.sidebar-active-proj-name {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .project-item-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
+  font-size: 13px;
 }
 
+/* Sidebar Footer & Shortcuts */
 .sidebar-footer {
-  padding: var(--space-sm);
+  padding: 6px;
   border-top: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1.5px;
 }
 
 .sidebar-shortcut-hint {
-  font-size: 10px;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
   color: var(--text-muted);
-  padding: 2px 6px;
+  padding: 1.5px 5px;
   border-radius: var(--radius-xs);
   background-color: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
   margin-left: auto;
+  letter-spacing: 0.3px;
 }
 
 .sidebar.collapsed .sidebar-shortcut-hint {

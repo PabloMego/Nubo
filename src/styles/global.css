@@ -14,17 +14,17 @@ html, body {
   font-family: var(--font-sans);
   background-color: var(--bg-app);
   color: var(--text-primary);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
 }
 
-/* Custom Scrollbars */
+/* Notion Thin Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -32,7 +32,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
+  background: var(--border-strong);
   border-radius: var(--radius-full);
 }
 
@@ -62,19 +62,21 @@ html, body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-xl) var(--space-2xl);
+  padding: 24px 36px 48px 36px;
+  box-sizing: border-box;
 }
 
-/* Typography Helpers */
+/* Typography Helpers - Notion Scale */
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   font-weight: 600;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
 }
 
-h1 { font-size: 24px; line-height: 1.25; }
-h2 { font-size: 18px; line-height: 1.3; }
-h3 { font-size: 15px; line-height: 1.4; }
+h1 { font-size: 26px; line-height: 1.25; font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: 18px; line-height: 1.3; font-weight: 600; }
+h3 { font-size: 14.5px; line-height: 1.4; font-weight: 600; }
+h4 { font-size: 13.5px; line-height: 1.4; font-weight: 600; }
 
 p {
   color: var(--text-secondary);
@@ -89,7 +91,7 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Form Controls & Inputs */
+/* Form Controls & Inputs - Notion Style */
 input, textarea, select {
   font-family: inherit;
   font-size: 13px;
@@ -97,20 +99,22 @@ input, textarea, select {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
+  padding: 6px 10px;
   outline: none;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  box-sizing: border-box;
 }
 
 input:focus, textarea:focus, select:focus {
   border-color: var(--border-focus);
+  box-shadow: 0 0 0 1px var(--border-focus);
 }
 
 input::placeholder, textarea::placeholder {
   color: var(--text-muted);
 }
 
-/* Date & Time Picker Controls (White Calendar Icon in Dark Mode) */
+/* Date & Time Picker Controls */
 input[type="date"],
 input[type="datetime-local"],
 input[type="time"] {
@@ -122,24 +126,23 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: brightness(0) invert(1);
-  opacity: 0.95;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator:hover,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
 input[type="time"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
-  transform: scale(1.08);
 }
 
-/* Buttons */
+/* Buttons - Notion Flat Minimal Aesthetics */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  padding: 7px 14px;
+  gap: 6px;
+  padding: 5px 12px;
   font-size: 13px;
   font-weight: 500;
   border-radius: var(--radius-sm);
@@ -149,23 +152,35 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   background: transparent;
   color: var(--text-primary);
   white-space: nowrap;
+  user-select: none;
+  line-height: 1.4;
+  box-sizing: border-box;
 }
 
 .btn svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
+}
+
+.btn:hover svg {
+  opacity: 1;
 }
 
 .btn-primary {
   background-color: var(--accent-primary);
   color: var(--text-inverse);
   border-color: var(--accent-primary);
+  font-weight: 550;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
   background-color: var(--accent-hover);
   border-color: var(--accent-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
@@ -198,27 +213,39 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .btn-sm {
-  padding: 4px 8px;
+  padding: 3px 8px;
   font-size: 12px;
+  border-radius: var(--radius-xs);
+}
+
+.btn-sm svg {
+  width: 13px;
+  height: 13px;
 }
 
 .btn-icon {
-  padding: 6px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Badges & Tags */
+/* Badges & Tags (Notion Chip Tag Style) */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 1.5px 7px;
   font-size: 11px;
   font-weight: 500;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-xs);
   background-color: var(--bg-subtle);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
+  line-height: 1.35;
 }
 
 .badge-active {
@@ -239,7 +266,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   border-color: transparent;
 }
 
-/* Empty States */
+/* Empty States - Notion Minimalist */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -251,11 +278,12 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .empty-state svg {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   stroke: var(--text-muted);
   stroke-width: 1.5;
   margin-bottom: var(--space-md);
+  opacity: 0.6;
 }
 
 .empty-state h3 {
@@ -272,7 +300,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* ========================================================
-   UNIFIED DESIGN SYSTEM FOUNDATION
+   UNIFIED NOTION DESIGN SYSTEM FOUNDATION
    Shared components for visual coherence across all pages
    ======================================================== */
 
@@ -284,7 +312,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
   padding-bottom: var(--space-xs);
   gap: var(--space-md);
   flex-shrink: 0;
@@ -304,7 +332,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -314,9 +342,9 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-title-row h2,
 .dev-title-row h1,
 .dev-title-row h2 {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--text-primary);
   margin: 0;
   display: flex;
@@ -329,14 +357,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3.5px 10px;
-  font-size: 12px;
+  padding: 3px 9px;
+  font-size: 11.5px;
   font-weight: 500;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .page-stats-badge strong,
@@ -349,10 +376,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-subtitle,
 .dev-hero-desc,
 .dev-subtitle {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--text-secondary);
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
   max-width: 640px;
 }
 
@@ -366,24 +393,34 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   flex-wrap: wrap;
 }
 
-/* 2. Subnav Navigation Tabs (Unified Segmented Pill Bar) */
+/* 2. Subnav Navigation Tabs (Unified Notion Segmented Pill Bar) */
 .nubo-nav-tabs,
 .brand-nav-tabs,
 .web-subnav-tabs,
-.dev-subnav-tabs {
+.dev-subnav-tabs,
+.mkt-subnav-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-surface);
+  gap: 3px;
+  background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 4px;
+  padding: 3px;
   width: fit-content;
   max-width: 100%;
   overflow-x: auto;
   margin-bottom: var(--space-lg);
   flex-shrink: 0;
   box-sizing: border-box;
+  scrollbar-width: none;
+}
+
+.nubo-nav-tabs::-webkit-scrollbar,
+.brand-nav-tabs::-webkit-scrollbar,
+.web-subnav-tabs::-webkit-scrollbar,
+.dev-subnav-tabs::-webkit-scrollbar,
+.mkt-subnav-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .nubo-tab-btn,
@@ -391,13 +428,14 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-tab-item,
 .dev-tab-item,
 .web-subnav-tab,
-.dev-subnav-tab {
+.dev-subnav-tab,
+.mkt-subnav-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 4px 11px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
@@ -405,9 +443,9 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
-  height: 32px;
   box-sizing: border-box;
-  flex-shrink: 0;
+  height: 28px;
+  user-select: none;
 }
 
 .nubo-tab-btn:hover,
@@ -415,7 +453,8 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-tab-item:hover,
 .dev-tab-item:hover,
 .web-subnav-tab:hover,
-.dev-subnav-tab:hover {
+.dev-subnav-tab:hover,
+.mkt-subnav-tab:hover {
   color: var(--text-primary);
   background-color: var(--bg-hover);
 }
@@ -425,49 +464,56 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .web-tab-item.active,
 .dev-tab-item.active,
 .web-subnav-tab.active,
-.dev-subnav-tab.active {
+.dev-subnav-tab.active,
+.mkt-subnav-tab.active {
   color: var(--text-primary);
-  background-color: var(--bg-subtle);
+  background-color: var(--bg-surface);
   border-color: var(--border-subtle);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  font-weight: 550;
 }
 
-.nubo-tab-badge {
-  font-size: 10.5px;
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
+.nubo-tab-badge,
+.mkt-tab-count-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
   background: var(--bg-subtle);
   color: var(--text-secondary);
 }
 
-.nubo-tab-btn.active .nubo-tab-badge {
-  background: var(--accent-tint);
+.nubo-tab-btn.active .nubo-tab-badge,
+.mkt-subnav-tab.active .mkt-tab-count-badge {
+  background: var(--bg-subtle);
   color: var(--text-primary);
-  font-weight: 600;
 }
 
-/* 3. Unified Cards */
+/* 3. Unified Cards (Notion Clean Flat Surface) */
 .nubo-card,
 .dev-card,
-.web-section-card {
+.web-section-card,
+.brand-card,
+.cmp-workspace-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: var(--space-lg);
+  padding: 16px 20px;
   box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   display: flex;
   flex-direction: column;
 }
 
 .nubo-card:hover,
-.dev-card:hover {
+.dev-card:hover,
+.brand-card:hover {
   border-color: var(--border-strong);
 }
 
 .nubo-card-header,
-.dev-card-header {
+.dev-card-header,
+.brand-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -479,13 +525,13 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .dev-card-title-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
 }
 
 .nubo-card-icon-bubble,
 .dev-card-icon-bubble {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
   background-color: var(--bg-subtle);
   display: flex;
@@ -496,33 +542,36 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .nubo-card-title,
-.dev-card-title {
-  font-size: 15px;
+.dev-card-title,
+.brand-card-title {
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .nubo-card-subtitle,
-.dev-card-subtitle {
+.dev-card-subtitle,
+.brand-card-desc {
   font-size: 12px;
   color: var(--text-secondary);
-  margin: 0;
+  margin: 2px 0 0 0;
+  line-height: 1.4;
 }
 
 /* 4. Unified Status Pills & Interactive Selectors */
 .dev-status-pill,
 .nubo-status-pill,
-.nubo-status-select {
+.nubo-status-select,
+.status-pill {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2.5px 8px;
-  border-radius: var(--radius-full);
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
   font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   background: var(--bg-subtle);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
@@ -530,6 +579,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   width: fit-content;
   max-width: fit-content;
   white-space: nowrap;
+  line-height: 1.35;
 }
 
 .nubo-status-select {
@@ -542,13 +592,10 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   background-position: right 6px center;
   transition: all var(--transition-fast);
   outline: none;
-  width: auto;
-  max-width: fit-content;
 }
 
 .nubo-status-select:hover {
   border-color: var(--border-strong);
-  filter: brightness(1.08);
 }
 
 .nubo-status-select option {
@@ -556,8 +603,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 500;
-  text-transform: none;
-  padding: 6px 10px;
+  padding: 5px 10px;
 }
 
 /* Custom Interactive Status Picker (Tight & Adaptive) */
@@ -574,29 +620,25 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 7px 2px 7px;
-  border-radius: var(--radius-full);
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
   font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 500;
   background: var(--bg-subtle);
   color: var(--text-secondary);
   transition: all var(--transition-fast);
   white-space: nowrap;
   width: fit-content;
-  max-width: fit-content;
   user-select: none;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .nubo-status-trigger:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  filter: brightness(1.1);
 }
 
 .nubo-status-trigger svg {
-  opacity: 0.7;
+  opacity: 0.65;
   transition: transform var(--transition-fast);
   margin-left: 1px;
 }
@@ -608,30 +650,29 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 .nubo-status-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 5px);
+  top: calc(100% + 4px);
   left: 0;
-  min-width: 140px;
+  min-width: 130px;
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  padding: 4px;
+  box-shadow: var(--shadow-md);
+  padding: 3px;
   z-index: 1000;
 }
 
 .nubo-status-dropdown.open .nubo-status-menu {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  animation: nuboFadeIn 0.15s ease;
+  gap: 1.5px;
 }
 
 .nubo-status-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: var(--radius-xs);
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -641,7 +682,7 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .nubo-status-option:hover {
-  background: var(--bg-subtle);
+  background: var(--bg-hover);
   color: var(--text-primary);
 }
 
@@ -652,49 +693,57 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .status-option-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
+/* Status variants with Notion pastel tones */
 .dev-status-pill.success,
 .nubo-status-pill.success,
-.nubo-status-select.success {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10B981;
-  border-color: rgba(16, 185, 129, 0.3);
+.status-pill.status-active,
+.status-pill.status-completed,
+.status-pill.status-published {
+  background: var(--status-active-bg);
+  color: var(--status-active);
+  border-color: transparent;
 }
 
 .dev-status-pill.warning,
 .nubo-status-pill.warning,
-.nubo-status-select.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #F59E0B;
-  border-color: rgba(245, 158, 11, 0.3);
+.status-pill.status-pending,
+.status-pill.status-in_progress {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border-color: transparent;
 }
 
 .dev-status-pill.danger,
 .nubo-status-pill.danger,
-.nubo-status-select.danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-  border-color: rgba(239, 68, 68, 0.3);
+.status-pill.status-failed,
+.status-pill.status-error {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+  border-color: transparent;
 }
 
 .dev-status-pill.info,
 .nubo-status-pill.info,
-.nubo-status-select.info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3B82F6;
-  border-color: rgba(59, 130, 246, 0.3);
+.status-pill.status-info,
+.status-pill.status-created {
+  background: var(--status-info-bg);
+  color: var(--status-info);
+  border-color: transparent;
 }
 
 .dev-status-pill.neutral,
 .nubo-status-pill.neutral,
-.nubo-status-select.neutral {
+.status-pill.status-not_created,
+.status-pill.status-draft {
   background: var(--bg-subtle);
   color: var(--text-muted);
+  border-color: var(--border-subtle);
 }
 
 .pulse-dot {
@@ -702,75 +751,78 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
   height: 6px;
   border-radius: 50%;
   background-color: currentColor;
-  box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
 }
 
-/* 5. Unified Search Box */
-.nubo-search-box {
+/* 5. Unified Notion Search Box */
+.nubo-search-box,
+.dev-search-box {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  padding: 4px 8px;
   transition: all var(--transition-fast);
+  box-sizing: border-box;
+  height: 30px;
 }
 
-.nubo-search-box:focus-within {
+.nubo-search-box:focus-within,
+.dev-search-box:focus-within {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 0 1px var(--border-focus);
 }
 
-.nubo-search-box input {
+.nubo-search-box input,
+.dev-search-box input {
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
   font-size: 12.5px;
   outline: none !important;
   box-shadow: none !important;
+  color: var(--text-primary);
+  min-width: 140px;
 }
 
-.nubo-search-box svg {
+.nubo-search-box svg,
+.dev-search-box svg {
   color: var(--text-muted);
   flex-shrink: 0;
+  width: 13px;
+  height: 13px;
 }
 
-/* 6. Unified Filter Pills */
-.nubo-filter-pills {
+.dev-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0 2px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
-.nubo-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 500;
-  border: 1px solid var(--border-subtle);
-  background-color: var(--bg-surface);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.nubo-filter-pill:hover {
-  border-color: var(--border-strong);
+.dev-search-clear:hover {
   color: var(--text-primary);
 }
 
-.nubo-filter-pill.active {
-  background-color: var(--accent-primary);
-  color: var(--text-inverse);
-  border-color: var(--accent-primary);
+/* 6. Filter Controls */
+.dev-filter-group select,
+.nubo-filter-group select {
+  height: 30px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
 }
 
-.nubo-filter-pill.active .nubo-tab-badge {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--text-inverse);
+.dev-filter-group select.active,
+.nubo-filter-group select.active {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
 }

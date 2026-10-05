@@ -1,48 +1,48 @@
-/* Home Projects Grid */
+/* Home Projects Grid (Notion Gallery Style) */
 .home-header {
-  margin-bottom: var(--space-2xl);
+  margin-bottom: var(--space-xl, 24px);
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
 
 .home-title {
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  margin-bottom: var(--space-xs);
+  font-size: 26px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  margin-bottom: 4px;
+  color: var(--text-primary);
 }
 
 .home-subtitle {
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-secondary);
 }
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
 }
 
 .project-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  border-radius: var(--radius-md, 6px);
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 200px;
+  height: 190px;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   position: relative;
 }
 
 .project-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  border-color: var(--border-default);
+  background-color: var(--bg-hover);
 }
 
 .project-card-header {
@@ -54,18 +54,18 @@
 .project-card-identity {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: 10px;
 }
 
 .project-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm, 4px);
   background-color: var(--bg-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
@@ -84,21 +84,21 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
 .project-card-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .project-card-desc {
   font-size: 12px;
   color: var(--text-secondary);
-  line-height: 1.4;
+  line-height: 1.45;
   margin-top: 6px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -110,20 +110,20 @@
   margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 6px;
 }
 
 .project-progress-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 11.5px;
+  color: var(--text-muted);
 }
 
 .progress-track {
   width: 100%;
-  height: 5px;
+  height: 4px;
   background-color: var(--bg-subtle);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -137,31 +137,35 @@
 }
 
 .new-project-card {
-  border: 1.5px dashed var(--border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md, 6px);
   background-color: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   box-shadow: none;
+  height: 190px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .new-project-card:hover {
-  border-color: var(--text-primary);
+  border-color: var(--border-strong);
   color: var(--text-primary);
-  background-color: var(--bg-surface);
-  transform: translateY(-2px);
+  background-color: var(--bg-hover);
 }
 
 .new-project-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm, 4px);
   background-color: var(--bg-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--border-subtle);
 }
+

@@ -310,66 +310,28 @@
   }
 }
 
-/* KANBAN COLUMN */
+/* KANBAN COLUMN - Notion Board Style */
 .kanban-column {
-  background: var(--bg-surface);
+  background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  box-shadow: none;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
   position: relative;
   overflow: hidden;
-}
-
-/* Top Accent line for each column */
-.kanban-column::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-}
-
-.kanban-column[data-status="todo"]::before {
-  background: linear-gradient(90deg, #64748B, #94A3B8);
-}
-
-.kanban-column[data-status="in_progress"]::before {
-  background: linear-gradient(90deg, #F59E0B, #FBBF24);
-}
-
-.kanban-column[data-status="done"]::before {
-  background: linear-gradient(90deg, #10B981, #34D399);
 }
 
 /* Column Drag Over Highlight */
 .kanban-column.drag-over {
   border-color: var(--accent-primary);
-  background-color: var(--bg-subtle);
-  box-shadow: 0 0 0 2px var(--accent-tint), var(--shadow-md);
-}
-
-.kanban-column[data-status="todo"].drag-over {
-  border-color: #64748B;
-  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.15), var(--shadow-md);
-}
-
-.kanban-column[data-status="in_progress"].drag-over {
-  border-color: #F59E0B;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2), var(--shadow-md);
-}
-
-.kanban-column[data-status="done"].drag-over {
-  border-color: #10B981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2), var(--shadow-md);
+  background-color: var(--bg-hover);
 }
 
 /* Column Header */
 .kanban-column-header {
-  padding: 14px 14px 10px 14px;
+  padding: 10px 12px 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -379,55 +341,48 @@
 .kanban-column-title-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .kanban-column-indicator {
-  width: 10px;
-  height: 10px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .kanban-column[data-status="todo"] .kanban-column-indicator {
-  background-color: #64748B;
+  background-color: var(--text-muted);
 }
 
 .kanban-column[data-status="in_progress"] .kanban-column-indicator {
-  background-color: #F59E0B;
-  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
-  animation: pulse-glow 2s infinite ease-in-out;
+  background-color: var(--status-warning);
 }
 
 .kanban-column[data-status="done"] .kanban-column-indicator {
-  background-color: #10B981;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.8; }
+  background-color: var(--status-active);
 }
 
 .kanban-column-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .kanban-column-count {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  padding: 1px 7px;
+  padding: 1px 6px;
   border-radius: var(--radius-full);
-  background: var(--bg-subtle);
+  background: var(--bg-surface);
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
 }
 
 .kanban-btn-add-column {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-sm);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -439,7 +394,7 @@
 }
 
 .kanban-btn-add-column:hover {
-  background: var(--bg-subtle);
+  background: var(--bg-hover);
   border-color: var(--border-subtle);
   color: var(--text-primary);
 }
@@ -454,53 +409,49 @@
   transition: background-color var(--transition-fast);
 }
 
-/* TASK CARD */
-.kanban-task-card {
-  background: var(--bg-app);
+/* TASK CARD - Notion Board Card */
+.kanban-task-card,
+.kanban-card {
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
   cursor: grab;
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  gap: 7px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   user-select: none;
+  box-shadow: var(--shadow-sm);
 }
 
-.kanban-task-card:hover {
-  transform: translateY(-2px);
+.kanban-task-card:hover,
+.kanban-card:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
-  background: var(--bg-surface);
 }
 
-.kanban-task-card:active {
+.kanban-task-card:active,
+.kanban-card:active {
   cursor: grabbing;
 }
 
 /* Card Dragging state */
-.kanban-task-card.is-dragging {
-  opacity: 0.4;
-  transform: rotate(2deg) scale(0.98);
-  border: 2px dashed var(--accent-primary);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+.kanban-task-card.is-dragging,
+.kanban-card.is-dragging {
+  opacity: 0.5;
+  border: 1px dashed var(--accent-primary);
+  box-shadow: var(--shadow-md);
 }
 
 /* Drop placeholder helper */
 .kanban-drop-placeholder {
-  height: 48px;
-  border: 2px dashed var(--accent-primary);
-  background: var(--accent-tint);
-  border-radius: var(--radius-md);
+  height: 44px;
+  border: 1px dashed var(--border-strong);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
   pointer-events: none;
-  animation: placeholder-fade 0.2s ease;
-}
-
-@keyframes placeholder-fade {
-  from { opacity: 0; transform: scaleY(0.6); }
-  to { opacity: 1; transform: scaleY(1); }
 }
 
 /* Card Header */
@@ -518,14 +469,14 @@
   flex-wrap: wrap;
 }
 
-/* Badges for Priority */
+/* Badges for Priority (Notion pastel tag style) */
 .badge-priority {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   font-size: 10.5px;
-  font-weight: 600;
-  padding: 2px 7px;
+  font-weight: 500;
+  padding: 1.5px 6px;
   border-radius: var(--radius-xs);
   text-transform: capitalize;
 }
@@ -533,13 +484,7 @@
 .badge-priority.urgent {
   background: rgba(239, 68, 68, 0.12);
   color: #DC2626;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  animation: urgent-pulse 2s infinite ease-in-out;
-}
-
-@keyframes urgent-pulse {
-  0%, 100% { border-color: rgba(239, 68, 68, 0.25); }
-  50% { border-color: rgba(239, 68, 68, 0.7); box-shadow: 0 0 6px rgba(239, 68, 68, 0.3); }
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .badge-priority.high {

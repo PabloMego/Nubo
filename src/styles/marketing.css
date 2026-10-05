@@ -13,13 +13,13 @@
 .mkt-subnav-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   overflow-x: auto;
-  padding: 4px;
-  background: var(--bg-surface);
+  padding: 3px;
+  background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  box-shadow: none;
   margin-bottom: var(--space-md);
   scrollbar-width: none;
   width: fit-content;
@@ -31,19 +31,21 @@
 }
 
 .mkt-subnav-tab {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  border: none;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   transition: all var(--transition-fast);
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .mkt-subnav-tab:hover {
@@ -52,24 +54,25 @@
 }
 
 .mkt-subnav-tab.active {
-  background: var(--text-primary);
-  color: var(--bg-surface);
-  font-weight: 600;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-weight: 550;
+  border-color: var(--border-subtle);
   box-shadow: var(--shadow-sm);
 }
 
 .mkt-tab-count-badge {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
   background: var(--bg-subtle);
   color: var(--text-secondary);
 }
 
 .mkt-subnav-tab.active .mkt-tab-count-badge {
-  background: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
 }
 
 /* Action Header Toolbar */

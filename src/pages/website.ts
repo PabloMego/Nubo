@@ -2,7 +2,7 @@ import { icons } from '../scripts/icons';
 import { appStore } from '../scripts/store';
 import { modalManager } from '../components/modal';
 import { showToast } from '../components/toast';
-import { WebsiteInfo, WebsitePage, WebsiteReferenceImage, Task, GitStatusResult, MINIMAL_AI_TEMPLATE_BASE64 } from '../scripts/types';
+import { WebsiteInfo, WebsitePage, WebsiteReferenceImage, Task, GitStatusResult, GitHubAccount, MINIMAL_AI_TEMPLATE_BASE64 } from '../scripts/types';
 import { t, getLanguage } from '../scripts/i18n';
 
 export class WebsitePageView {
@@ -61,12 +61,14 @@ export class WebsitePageView {
       }
     }
 
-    // Load website info, tasks, and settings in parallel
-    const [web, allTasks, settings] = await Promise.all([
+    // Load website info, tasks, settings and github account in parallel
+    const [web, allTasks, settings, loadedGh] = await Promise.all([
       window.nubo.website.getByProject(project.id) as Promise<WebsiteInfo>,
       window.nubo.tasks.getByProject(project.id) as Promise<Task[]>,
-      window.nubo.settings.get()
+      window.nubo.settings.get(),
+      window.nubo?.github?.getAccount ? window.nubo.github.getAccount() : null
     ]);
+    const githubAccount: GitHubAccount | null = loadedGh || settings.githubAccount || null;
 
     // Automatically sync URL from project if website has none yet
     if (!web.url && project.website) {
@@ -203,9 +205,9 @@ export class WebsitePageView {
 
         <!-- Tab Content Routing -->
         ${WebsitePageView.activeTab === 'all'
-          ? WebsitePageView.renderAllView(project, settings, web, gitStatus, websiteCodePath, websiteBase, folderExists, counts, completionRate, websiteTaggedTasks)
+          ? WebsitePageView.renderAllView(project, settings, web, gitStatus, websiteCodePath, websiteBase, folderExists, counts, completionRate, websiteTaggedTasks, githubAccount)
           : WebsitePageView.activeTab === 'code'
-          ? WebsitePageView.renderCodeView(project, settings, gitStatus, websiteCodePath, folderExists)
+          ? WebsitePageView.renderCodeView(project, settings, gitStatus, websiteCodePath, folderExists, githubAccount)
           : WebsitePageView.activeTab === 'pages'
           ? WebsitePageView.renderPagesView(web, project)
           : WebsitePageView.activeTab === 'design'
@@ -233,7 +235,8 @@ export class WebsitePageView {
     folderExists: boolean,
     counts: { all: number; todo: number; in_progress: number; done: number },
     completionRate: number,
-    tasks: Task[]
+    tasks: Task[],
+    githubAccount?: GitHubAccount | null
   ): string {
     const editor = settings.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' };
     const referenceImages = web.reference_images || [];
@@ -251,7 +254,7 @@ export class WebsitePageView {
 
         <!-- 2. Grid Principal: Git & Illustrator -->
         <div class="web-dashboard-grid">
-          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges)}
+          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges, githubAccount)}
           ${this.renderIllustratorCardHtml(web, websiteBase)}
         </div>
 
@@ -352,7 +355,8 @@ export class WebsitePageView {
     settings: any,
     gitStatus: GitStatusResult | null,
     websiteCodePath: string,
-    folderExists: boolean
+    folderExists: boolean,
+    githubAccount?: GitHubAccount | null
   ): string {
     const editor = settings.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' };
     const isGit = gitStatus?.isGitRepo;
@@ -368,7 +372,7 @@ export class WebsitePageView {
         <!-- 2. Grid enfocado de Código & Git -->
         <div class="dev-code-grid">
           <!-- Tarjeta 1: GitHub & Control de Versiones -->
-          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges)}
+          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges, githubAccount)}
 
           <!-- Tarjeta 2: Herramientas del Entorno Local -->
           <div class="dev-card">
@@ -898,7 +902,8 @@ export class WebsitePageView {
     isConnectedToGitHub: boolean | undefined,
     gitStatus: GitStatusResult | null,
     gitBranch: string,
-    gitChanges: string
+    gitChanges: string,
+    githubAccount?: GitHubAccount | null
   ): string {
     return `
       <div class="dev-card">
@@ -913,16 +918,30 @@ export class WebsitePageView {
             </div>
           </div>
 
-          ${isConnectedToGitHub ? `
-            <span class="dev-status-pill ${gitStatus?.hasChanges ? 'warning' : 'success'}">
-              <span class="pulse-dot ${gitStatus?.hasChanges ? 'warning' : ''}"></span>
-              ${gitStatus?.hasChanges ? 'Cambios pendientes' : 'Sincronizado'}
-            </span>
-          ` : isGit ? `
-            <span class="dev-status-pill neutral">Git local</span>
-          ` : `
-            <span class="dev-status-pill neutral">Sin conectar</span>
-          `}
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${githubAccount ? `
+              <button class="btn btn-ghost btn-xs" id="btn-web-gh-account" title="Cuenta activa: @${githubAccount.username} (clic para cambiar)" style="display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px;">
+                <img src="${githubAccount.avatar_url || 'https://github.com/' + githubAccount.username + '.png'}" style="width: 14px; height: 14px; border-radius: 50%;" />
+                <span>@${githubAccount.username}</span>
+              </button>
+            ` : `
+              <button class="btn btn-ghost btn-xs" id="btn-web-gh-account" title="Conectar cuenta de GitHub con Token" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; color: var(--text-secondary);">
+                ${icons.github(12)}
+                <span>Conectar cuenta</span>
+              </button>
+            `}
+
+            ${isConnectedToGitHub ? `
+              <span class="dev-status-pill ${gitStatus?.hasChanges ? 'warning' : 'success'}">
+                <span class="pulse-dot ${gitStatus?.hasChanges ? 'warning' : ''}"></span>
+                ${gitStatus?.hasChanges ? 'Cambios pendientes' : 'Sincronizado'}
+              </span>
+            ` : isGit ? `
+              <span class="dev-status-pill neutral">Git local</span>
+            ` : `
+              <span class="dev-status-pill neutral">Sin conectar</span>
+            `}
+          </div>
         </div>
 
         <div class="dev-card-body">
@@ -1726,6 +1745,14 @@ export class WebsitePageView {
       } else {
         alert(res.message);
       }
+    });
+
+    // GitHub Account button in card
+    container.querySelector('#btn-web-gh-account')?.addEventListener('click', () => {
+      modalManager.openGitHubAccountModal(async () => {
+        WebsitePageView.cachedGitStatus = null;
+        await WebsitePageView.render(container);
+      });
     });
 
     container.querySelector('#btn-connect-repo')?.addEventListener('click', () => {

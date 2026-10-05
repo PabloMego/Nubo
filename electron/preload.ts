@@ -82,6 +82,12 @@ const nuboApi = {
     update: (updates: any) => ipcRenderer.invoke('nubo:settings:update', updates),
     selectDirectory: () => ipcRenderer.invoke('nubo:settings:selectDirectory')
   },
+  github: {
+    getAccount: () => ipcRenderer.invoke('nubo:github:getAccount'),
+    connectAccount: (token: string) => ipcRenderer.invoke('nubo:github:connectAccount', token),
+    disconnectAccount: () => ipcRenderer.invoke('nubo:github:disconnectAccount'),
+    openTokenGenerator: () => ipcRenderer.invoke('nubo:github:openTokenGenerator')
+  },
   search: {
     query: (q: string, projectId?: string) => ipcRenderer.invoke('nubo:search:query', q, projectId)
   },

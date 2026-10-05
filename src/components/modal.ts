@@ -830,14 +830,44 @@ export class ModalManager {
     });
   }
 
-  public openConnectGitModal(folderPath: string, currentUrl: string = '', onConnected?: () => void) {
+  public async openConnectGitModal(folderPath: string, currentUrl: string = '', onConnected?: () => void) {
     const isEs = getLanguage() === 'es';
+    let ghAccount = null;
+    try {
+      if (window.nubo?.github?.getAccount) {
+        ghAccount = await window.nubo.github.getAccount();
+      }
+    } catch (e) {}
+
     const bodyHtml = `
+      <!-- GitHub Active Account Banner -->
+      <div style="margin-bottom: 14px; padding: 10px 12px; background: var(--bg-surface-elevated, rgba(255,255,255,0.03)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 8px); display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 9px; min-width: 0;">
+          <div style="width: 28px; height: 28px; border-radius: 50%; background: #24292f; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; overflow: hidden;">
+            ${ghAccount?.avatar_url 
+              ? `<img src="${ghAccount.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;" />`
+              : icons.github(16)}
+          </div>
+          <div style="min-width: 0;">
+            <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>${ghAccount ? `@${ghAccount.username}` : (isEs ? 'Sin cuenta de GitHub activa' : 'No active GitHub account')}</span>
+              ${ghAccount ? `<span class="dev-status-pill success" style="font-size: 9.5px; padding: 1px 5px;"><span class="pulse-dot"></span>${isEs ? 'Sesión iniciada' : 'Signed in'}</span>` : ''}
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); display: block;">
+              ${ghAccount ? (isEs ? 'Los cambios se subirán con esta cuenta' : 'Changes will push with this account') : (isEs ? 'Inicia sesión para subir sin pedir credenciales' : 'Sign in to push seamlessly')}
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-modal-manage-gh-account" style="font-size: 11px; padding: 3px 8px; flex-shrink: 0;">
+          ${ghAccount ? (isEs ? 'Cambiar cuenta' : 'Switch') : (isEs ? 'Iniciar sesión' : 'Sign in')}
+        </button>
+      </div>
+
       <div class="form-group">
         <label class="form-label">${isEs ? 'URL del Repositorio de GitHub' : 'GitHub Repository URL'}</label>
         <input type="url" id="git-remote-url" value="${currentUrl}" placeholder="https://github.com/usuario/proyecto.git" autofocus />
         <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">
-          ${isEs ? 'Pega la dirección HTTPS o SSH de tu repositorio en GitHub para vincular este proyecto.' : 'Paste the HTTPS or SSH link to your GitHub repository.'}
+          ${isEs ? 'Pega la dirección HTTPS o SSH de tu repositorio en GitHub para vincular esta carpeta.' : 'Paste the HTTPS or SSH link to your GitHub repository.'}
         </span>
       </div>
 
@@ -868,6 +898,12 @@ export class ModalManager {
     `;
 
     this.open(isEs ? 'Conectar con GitHub' : 'Connect to GitHub', bodyHtml, footerHtml);
+
+    document.getElementById('btn-modal-manage-gh-account')?.addEventListener('click', () => {
+      this.openGitHubAccountModal(() => {
+        this.openConnectGitModal(folderPath, currentUrl, onConnected);
+      });
+    });
 
     document.getElementById('btn-modal-open-github-browser')?.addEventListener('click', async () => {
       await window.nubo.development.openGitHub('https://github.com/new');
@@ -901,6 +937,151 @@ export class ModalManager {
         if (onConnected) onConnected();
       } else {
         alert((isEs ? 'Error al conectar repositorio: ' : 'Error connecting repository: ') + res.message);
+      }
+    });
+  }
+
+  public async openGitHubAccountModal(onSuccess?: () => void) {
+    const isEs = getLanguage() === 'es';
+    let currentAccount = null;
+    try {
+      if (window.nubo?.github?.getAccount) {
+        currentAccount = await window.nubo.github.getAccount();
+      }
+    } catch (e) {
+      console.warn('Error fetching github account:', e);
+    }
+
+    const bodyHtml = `
+      <div style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-surface-elevated, rgba(255,255,255,0.03)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 8px);">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #24292f; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; overflow: hidden; border: 2px solid var(--border-subtle);">
+            ${currentAccount?.avatar_url 
+              ? `<img src="${currentAccount.avatar_url}" style="width: 100%; height: 100%; object-fit: cover;" />`
+              : icons.github(24)}
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 600; font-size: 14px; color: var(--text-primary);">
+                ${currentAccount ? `@${currentAccount.username}` : (isEs ? 'Sin cuenta vinculada' : 'No account linked')}
+              </span>
+              ${currentAccount ? `
+                <span class="dev-status-pill success" style="font-size: 10.5px; padding: 2px 7px;">
+                  <span class="pulse-dot"></span>
+                  ${isEs ? 'Conectado' : 'Connected'}
+                </span>
+              ` : `
+                <span class="dev-status-pill neutral" style="font-size: 10.5px; padding: 2px 7px;">
+                  ${isEs ? 'Desconectado' : 'Disconnected'}
+                </span>
+              `}
+            </div>
+            <span style="font-size: 12px; color: var(--text-secondary); display: block; margin-top: 3px;">
+              ${currentAccount ? (currentAccount.name || currentAccount.email || (isEs ? 'Cuenta activa para sincronizar y hacer push' : 'Active account for push & pull')) : (isEs ? 'Inicia sesión con tu cuenta de GitHub para subir proyectos en cualquier ordenador' : 'Sign in to push repositories on any computer')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label class="form-label" style="margin: 0; font-weight: 600;">${isEs ? 'Token de Acceso Personal (PAT)' : 'Personal Access Token (PAT)'}</label>
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-open-pat-generator" style="display: inline-flex; align-items: center; gap: 5px; color: var(--primary); font-size: 11.5px; padding: 2px 6px;">
+            ${icons.external(11)}
+            <span>${isEs ? 'Generar Token en GitHub' : 'Generate Token on GitHub'}</span>
+          </button>
+        </div>
+        <input 
+          type="password" 
+          id="github-pat-input" 
+          placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
+          style="font-family: monospace; font-size: 12.5px; letter-spacing: 0.5px;" 
+          autofocus 
+        />
+        <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 8px; display: block; line-height: 1.45;">
+          ${isEs 
+            ? '💡 Al pulsar <strong>"Generar Token en GitHub"</strong> se abrirá tu navegador con los permisos necesarios ya marcados (<code>repo</code>). Solo pulsa <em>Generate token</em> en la web, copia la clave y pégala aquí.' 
+            : '💡 Clicking <strong>"Generate Token on GitHub"</strong> opens your browser with <code>repo</code> permissions preselected. Click <em>Generate token</em> on the website and paste it here.'}
+        </span>
+      </div>
+    `;
+
+    const footerHtml = `
+      <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <div>
+          ${currentAccount ? `
+            <button type="button" class="btn btn-danger btn-sm" id="btn-modal-logout-github">
+              ${isEs ? 'Cerrar sesión' : 'Sign Out'}
+            </button>
+          ` : ''}
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button class="btn btn-secondary" id="modal-cancel">${t('common.cancel')}</button>
+          <button class="btn btn-primary" id="modal-submit-github-token" style="display: inline-flex; align-items: center; gap: 6px;">
+            ${icons.github(13)}
+            <span>${currentAccount ? (isEs ? 'Cambiar Cuenta' : 'Switch Account') : (isEs ? 'Conectar Cuenta' : 'Connect Account')}</span>
+          </button>
+        </div>
+      </div>
+    `;
+
+    this.open(isEs ? 'Cuenta de GitHub' : 'GitHub Account', bodyHtml, footerHtml);
+
+    document.getElementById('modal-cancel')?.addEventListener('click', () => this.close());
+
+    document.getElementById('btn-open-pat-generator')?.addEventListener('click', async () => {
+      if (window.nubo?.github?.openTokenGenerator) {
+        await window.nubo.github.openTokenGenerator();
+      } else {
+        window.open('https://github.com/settings/tokens/new?description=Nubo%20Desktop&scopes=repo,read:user,user:email', '_blank');
+      }
+    });
+
+    document.getElementById('btn-modal-logout-github')?.addEventListener('click', async () => {
+      if (confirm(isEs ? '¿Cerrar sesión de GitHub en Nubo?' : 'Sign out of GitHub?')) {
+        if (window.nubo?.github?.disconnectAccount) {
+          await window.nubo.github.disconnectAccount();
+        }
+        showToast(isEs ? 'Sesión de GitHub cerrada.' : 'Signed out of GitHub.');
+        this.close();
+        if (onSuccess) onSuccess();
+      }
+    });
+
+    const submitBtn = document.getElementById('modal-submit-github-token') as HTMLButtonElement;
+    const tokenInput = document.getElementById('github-pat-input') as HTMLInputElement;
+
+    tokenInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitBtn?.click();
+      }
+    });
+
+    submitBtn?.addEventListener('click', async () => {
+      const token = tokenInput?.value.trim();
+      if (!token) {
+        showToast(isEs ? 'Introduce un token válido de GitHub.' : 'Please enter a valid GitHub token.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>${isEs ? 'Verificando con GitHub...' : 'Verifying...'}</span>`;
+
+      try {
+        const res = await window.nubo.github.connectAccount(token);
+        if (res.success && res.account) {
+          showToast(isEs ? `Conectado como @${res.account.username}` : `Connected as @${res.account.username}`, 'success');
+          this.close();
+          if (onSuccess) onSuccess();
+        } else {
+          alert((isEs ? 'Error al verificar token: ' : 'Error verifying token: ') + (res.message || 'Token no válido'));
+        }
+      } catch (err: any) {
+        alert((isEs ? 'Error de conexión: ' : 'Connection error: ') + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `${icons.github(13)} <span>${currentAccount ? (isEs ? 'Cambiar Cuenta' : 'Switch Account') : (isEs ? 'Conectar Cuenta' : 'Connect Account')}</span>`;
       }
     });
   }

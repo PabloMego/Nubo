@@ -314,6 +314,23 @@ export function registerIpcHandlers(): void {
     return null;
   });
 
+  // === GitHub Integration ===
+  ipcMain.handle('nubo:github:getAccount', async () => {
+    return settingsService.getGitHubAccount();
+  });
+
+  ipcMain.handle('nubo:github:connectAccount', async (_, token: string) => {
+    return settingsService.verifyAndConnectGitHub(token);
+  });
+
+  ipcMain.handle('nubo:github:disconnectAccount', async () => {
+    return settingsService.disconnectGitHub();
+  });
+
+  ipcMain.handle('nubo:github:openTokenGenerator', async () => {
+    return settingsService.openTokenGenerator();
+  });
+
   // === Search ===
   ipcMain.handle('nubo:search:query', async (_, query: string, projectId?: string) => {
     return searchService.search(query, projectId);

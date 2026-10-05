@@ -1,7 +1,16 @@
 import path from 'path';
 import fs from 'fs';
-import { app } from 'electron';
+import { app, shell } from 'electron';
 import { DatabaseService } from './database.service';
+
+export interface GitHubAccount {
+  token: string;
+  username: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  connected_at: string;
+}
 
 export interface ConfiguredEditor {
   id: string;
@@ -18,6 +27,7 @@ export interface AppSettings {
   language: 'es' | 'en';
   version: string;
   configuredEditor: ConfiguredEditor;
+  githubAccount?: GitHubAccount | null;
 }
 
 export class SettingsService {
@@ -97,7 +107,8 @@ export class SettingsService {
       onboardingCompleted,
       language,
       version: app ? app.getVersion() : '1.0.0',
-      configuredEditor
+      configuredEditor,
+      githubAccount: this.getGitHubAccount()
     };
   }
 
@@ -112,6 +123,107 @@ export class SettingsService {
     } catch (e) {
       console.warn('Could not update setting in db:', e);
     }
+  }
+
+  public getGitHubAccount(): GitHubAccount | null {
+    const db = this.dbService.getAdapter();
+    if (!db) return null;
+    try {
+      const row = db.get<{ key: string; value: string }>('SELECT value FROM settings WHERE key = ?', ['github_account']);
+      if (row && row.value) {
+        return JSON.parse(row.value) as GitHubAccount;
+      }
+    } catch (e) {
+      console.warn('[SettingsService] Error reading github_account from db:', e);
+    }
+    return null;
+  }
+
+  public setGitHubAccount(account: GitHubAccount | null): void {
+    const db = this.dbService.getAdapter();
+    if (!db) return;
+    try {
+      if (account) {
+        this.updateSetting('github_account', JSON.stringify(account));
+      } else {
+        db.run('DELETE FROM settings WHERE key = ?', ['github_account']);
+      }
+    } catch (e) {
+      console.warn('[SettingsService] Error updating github_account in db:', e);
+    }
+  }
+
+  public async verifyAndConnectGitHub(token: string): Promise<{ success: boolean; account?: GitHubAccount; message?: string }> {
+    const cleanToken = token.trim();
+    if (!cleanToken) {
+      return { success: false, message: 'El token de GitHub no puede estar vacío.' };
+    }
+
+    try {
+      const res = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${cleanToken}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Nubo-Desktop-App'
+        }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          return { success: false, message: 'Token no válido o expirado. Asegúrate de que tenga permisos marcados de "repo".' };
+        }
+        return { success: false, message: `Error de GitHub (${res.status}): ${res.statusText}` };
+      }
+
+      const user = await res.json();
+
+      let email = user.email || '';
+      if (!email) {
+        try {
+          const emailsRes = await fetch('https://api.github.com/user/emails', {
+            headers: {
+              'Authorization': `Bearer ${cleanToken}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'User-Agent': 'Nubo-Desktop-App'
+            }
+          });
+          if (emailsRes.ok) {
+            const emails = await emailsRes.json();
+            if (Array.isArray(emails) && emails.length > 0) {
+              const primary = emails.find((e: any) => e.primary) || emails[0];
+              email = primary.email || '';
+            }
+          }
+        } catch {
+          // ignore email fetch fallback
+        }
+      }
+
+      const account: GitHubAccount = {
+        token: cleanToken,
+        username: user.login,
+        name: user.name || user.login,
+        email: email || `${user.login}@users.noreply.github.com`,
+        avatar_url: user.avatar_url || '',
+        connected_at: new Date().toISOString()
+      };
+
+      this.setGitHubAccount(account);
+      return { success: true, account };
+    } catch (err: any) {
+      return { success: false, message: `No se pudo conectar con GitHub: ${err.message || err}` };
+    }
+  }
+
+  public disconnectGitHub(): { success: boolean } {
+    this.setGitHubAccount(null);
+    return { success: true };
+  }
+
+  public async openTokenGenerator(): Promise<boolean> {
+    const url = 'https://github.com/settings/tokens/new?description=Nubo%20Desktop&scopes=repo,read:user,user:email';
+    await shell.openExternal(url);
+    return true;
   }
 
   public updateSettings(partial: Partial<AppSettings>): AppSettings {

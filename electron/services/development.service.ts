@@ -631,6 +631,15 @@ export class DevelopmentService {
    */
   private async ensureGitIdentity(target: string, remoteUrl?: string): Promise<void> {
     try {
+      const gh = this.settingsService.getGitHubAccount();
+      if (gh && gh.username) {
+        const ghName = gh.name || gh.username;
+        const ghEmail = gh.email || `${gh.username}@users.noreply.github.com`;
+        await this.runExec(`git config user.name "${ghName}"`, target).catch(() => {});
+        await this.runExec(`git config user.email "${ghEmail}"`, target).catch(() => {});
+        return;
+      }
+
       const userName = await this.runExec('git config user.name', target).catch(() => '');
       const userEmail = await this.runExec('git config user.email', target).catch(() => '');
 
@@ -657,6 +666,25 @@ export class DevelopmentService {
     } catch (err) {
       console.warn('[DevelopmentService] ensureGitIdentity warning:', err);
     }
+  }
+
+  /**
+   * Returns an authenticated remote URL with the user's GitHub Personal Access Token if connected,
+   * enabling seamless push and pull on ANY machine without manual Git credentials configuration.
+   */
+  private getAuthenticatedRemoteTarget(remoteUrl: string): string {
+    try {
+      const gh = this.settingsService.getGitHubAccount();
+      if (gh && gh.token && remoteUrl) {
+        const match = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/.]+)/i);
+        if (match && match[1] && match[2]) {
+          return `https://${gh.token}@github.com/${match[1]}/${match[2]}.git`;
+        }
+      }
+    } catch (e) {
+      console.warn('[DevelopmentService] getAuthenticatedRemoteTarget error:', e);
+    }
+    return 'origin';
   }
 
   /**
@@ -831,17 +859,25 @@ export class DevelopmentService {
       }
 
       // 10. Execute push with upstream tracking
+      const remoteTarget = this.getAuthenticatedRemoteTarget(remoteUrl);
       try {
-        const output = await this.runExec(`git push -u origin ${targetBranch}`, target);
+        const output = await this.runExec(`git push -u ${remoteTarget} ${targetBranch}`, target);
         return { success: true, message: output || 'Push completado exitosamente. Cambios subidos a GitHub.' };
       } catch (pushErr: any) {
         const pushErrMsg = (pushErr.message || pushErr.toString());
 
+        if (pushErrMsg.includes('Bad credentials') || pushErrMsg.includes('Invalid username or password') || pushErrMsg.includes('401')) {
+          return {
+            success: false,
+            message: 'Error de autenticación con GitHub (Token no válido o expirado). Ve a Configuración > GitHub para actualizar tu cuenta.'
+          };
+        }
+
         // Handle case where remote already contains commits (need to merge/rebase first)
         if (pushErrMsg.includes('rejected') || pushErrMsg.includes('fetch first') || pushErrMsg.includes('non-fast-forward')) {
           try {
-            await this.runExec(`git pull origin ${targetBranch} --allow-unrelated-histories --no-rebase -X theirs`, target);
-            const retryOutput = await this.runExec(`git push -u origin ${targetBranch}`, target);
+            await this.runExec(`git pull ${remoteTarget} ${targetBranch} --allow-unrelated-histories --no-rebase -X theirs`, target);
+            const retryOutput = await this.runExec(`git push -u ${remoteTarget} ${targetBranch}`, target);
             return { success: true, message: retryOutput || 'Push completado tras sincronizar con GitHub.' };
           } catch (mergeErr: any) {
             return {
@@ -902,6 +938,7 @@ export class DevelopmentService {
 
       // 5. Check if local has commits
       const hasCommits = await this.runExec('git rev-parse --verify HEAD', target).then(() => true).catch(() => false);
+      const remoteTarget = this.getAuthenticatedRemoteTarget(remoteUrl);
 
       if (hasCommits) {
         // Auto-commit or save pending changes if any before pulling
@@ -911,12 +948,12 @@ export class DevelopmentService {
           await this.runExec(`git commit -m "Auto-guardado antes de pull - ${new Date().toLocaleString()}"`, target).catch(() => {});
         }
 
-        const output = await this.runExec(`git pull origin ${targetBranch} --allow-unrelated-histories`, target);
+        const output = await this.runExec(`git pull ${remoteTarget} ${targetBranch} --allow-unrelated-histories`, target);
         await this.runExec(`git branch --set-upstream-to=origin/${targetBranch} ${targetBranch}`, target).catch(() => {});
         return { success: true, message: output || 'Pull completado. Archivos sincronizados con GitHub.' };
       } else {
         // Local has no commits, pull the branch from remote
-        const output = await this.runExec(`git pull origin ${targetBranch}`, target);
+        const output = await this.runExec(`git pull ${remoteTarget} ${targetBranch}`, target);
         await this.runExec(`git branch --set-upstream-to=origin/${targetBranch} ${targetBranch}`, target).catch(() => {});
         return { success: true, message: output || 'Proyecto descargado con éxito desde GitHub.' };
       }

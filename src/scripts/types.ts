@@ -321,6 +321,15 @@ export interface GitStatusResult {
   error?: string;
 }
 
+export interface GitHubAccount {
+  token: string;
+  username: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  connected_at: string;
+}
+
 export interface AppSettings {
   storagePath: string;
   theme: 'system' | 'light' | 'dark';
@@ -330,6 +339,7 @@ export interface AppSettings {
   language: 'es' | 'en';
   version: string;
   configuredEditor: ConfiguredEditor;
+  githubAccount?: GitHubAccount | null;
 }
 
 export interface SearchResult {
@@ -425,6 +435,12 @@ declare global {
         get(): Promise<AppSettings>;
         update(updates: any): Promise<AppSettings>;
         selectDirectory(): Promise<string | null>;
+      };
+      github: {
+        getAccount(): Promise<GitHubAccount | null>;
+        connectAccount(token: string): Promise<{ success: boolean; account?: GitHubAccount; message?: string }>;
+        disconnectAccount(): Promise<{ success: boolean }>;
+        openTokenGenerator(): Promise<boolean>;
       };
       search: {
         query(q: string, projectId?: string): Promise<SearchResult[]>;

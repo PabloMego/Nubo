@@ -11,6 +11,7 @@ import '../styles/modal.css';
 import '../styles/development.css';
 import '../styles/website.css';
 import '../styles/guide.css';
+import '../styles/settings.css';
 
 import { appStore } from './store';
 import { Sidebar } from '../components/sidebar';

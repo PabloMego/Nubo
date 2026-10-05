@@ -578,6 +578,34 @@ export function installBrowserFallback(): void {
         }),
         selectDirectory: async () => 'C:/Users/medin/Documents/Nubo Projects'
       },
+      github: {
+        getAccount: async () => {
+          const raw = localStorage.getItem('nubo_mock_github_account');
+          return raw ? JSON.parse(raw) : null;
+        },
+        connectAccount: async (token: string) => {
+          const clean = token.trim();
+          if (!clean) return { success: false, message: 'Token no puede estar vacío.' };
+          const mockAcc = {
+            token: clean,
+            username: 'PabloMego',
+            name: 'Pablo Mego',
+            email: 'pablo@nubo.app',
+            avatar_url: 'https://github.com/PabloMego.png',
+            connected_at: new Date().toISOString()
+          };
+          localStorage.setItem('nubo_mock_github_account', JSON.stringify(mockAcc));
+          return { success: true, account: mockAcc };
+        },
+        disconnectAccount: async () => {
+          localStorage.removeItem('nubo_mock_github_account');
+          return { success: true };
+        },
+        openTokenGenerator: async () => {
+          window.open('https://github.com/settings/tokens/new?description=Nubo%20Desktop&scopes=repo,read:user,user:email', '_blank');
+          return true;
+        }
+      },
       search: {
         query: async (q) => [
           { id: 'p1', type: 'project', title: 'Nubo', subtitle: 'Proyecto SaaS' },

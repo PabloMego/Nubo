@@ -2,7 +2,7 @@ import { icons } from '../scripts/icons';
 import { appStore } from '../scripts/store';
 import { modalManager } from '../components/modal';
 import { showToast } from '../components/toast';
-import { Task, ProductSpec, ProductFeature, GitStatusResult } from '../scripts/types';
+import { Task, ProductSpec, ProductFeature, GitStatusResult, GitHubAccount } from '../scripts/types';
 import { t, getLanguage } from '../scripts/i18n';
 
 export class DevelopmentPage {
@@ -55,16 +55,19 @@ export class DevelopmentPage {
         }
       }
 
-      // Load tasks, specs and settings safely
+      // Load tasks, specs, settings and github account safely
       let allTasks: Task[] = [];
       let settings: any = {};
+      let githubAccount: GitHubAccount | null = null;
       try {
-        const [loadedTasks, loadedSettings] = await Promise.all([
+        const [loadedTasks, loadedSettings, loadedGh] = await Promise.all([
           window.nubo?.tasks?.getByProject ? window.nubo.tasks.getByProject(project.id) : [],
-          window.nubo?.settings?.get ? window.nubo.settings.get() : {}
+          window.nubo?.settings?.get ? window.nubo.settings.get() : {},
+          window.nubo?.github?.getAccount ? window.nubo.github.getAccount() : null
         ]);
         allTasks = Array.isArray(loadedTasks) ? loadedTasks : [];
         settings = loadedSettings || {};
+        githubAccount = loadedGh || settings.githubAccount || null;
       } catch (err) {
         console.warn('[DevelopmentPage] Error loading tasks/settings:', err);
       }
@@ -186,9 +189,9 @@ export class DevelopmentPage {
 
           <!-- TAB CONTENT -->
           ${DevelopmentPage.activeTab === 'all' || DevelopmentPage.activeTab === 'overview'
-            ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks)
+            ? DevelopmentPage.renderAllView(project, settings, specs, gitStatus, folderExists, counts, completionRate, allTasks, githubAccount)
             : DevelopmentPage.activeTab === 'code'
-            ? DevelopmentPage.renderCodeAndGit(project, settings, gitStatus, folderExists)
+            ? DevelopmentPage.renderCodeAndGit(project, settings, gitStatus, folderExists, githubAccount)
             : DevelopmentPage.activeTab === 'specs'
             ? DevelopmentPage.renderSpecifications(specs)
             : DevelopmentPage.renderKanbanView(allTasks, counts, completionRate)}
@@ -282,7 +285,8 @@ export class DevelopmentPage {
     isConnectedToGitHub: boolean | undefined,
     gitStatus: GitStatusResult | null,
     gitBranch: string,
-    gitChanges: string
+    gitChanges: string,
+    githubAccount?: GitHubAccount | null
   ): string {
     return `
       <div class="dev-card">
@@ -297,16 +301,30 @@ export class DevelopmentPage {
             </div>
           </div>
 
-          ${isConnectedToGitHub ? `
-            <span class="dev-status-pill ${gitStatus?.hasChanges ? 'warning' : 'success'}">
-              <span class="pulse-dot ${gitStatus?.hasChanges ? 'warning' : ''}"></span>
-              ${gitStatus?.hasChanges ? 'Cambios pendientes' : 'Sincronizado'}
-            </span>
-          ` : isGit ? `
-            <span class="dev-status-pill neutral">Git local</span>
-          ` : `
-            <span class="dev-status-pill neutral">Sin conectar</span>
-          `}
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${githubAccount ? `
+              <button class="btn btn-ghost btn-xs" id="btn-dev-gh-account" title="Cuenta activa: @${githubAccount.username} (clic para cambiar)" style="display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px;">
+                <img src="${githubAccount.avatar_url || 'https://github.com/' + githubAccount.username + '.png'}" style="width: 14px; height: 14px; border-radius: 50%;" />
+                <span>@${githubAccount.username}</span>
+              </button>
+            ` : `
+              <button class="btn btn-ghost btn-xs" id="btn-dev-gh-account" title="Conectar cuenta de GitHub con Token" style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm); font-size: 11px; color: var(--text-secondary);">
+                ${icons.github(12)}
+                <span>Conectar cuenta</span>
+              </button>
+            `}
+
+            ${isConnectedToGitHub ? `
+              <span class="dev-status-pill ${gitStatus?.hasChanges ? 'warning' : 'success'}">
+                <span class="pulse-dot ${gitStatus?.hasChanges ? 'warning' : ''}"></span>
+                ${gitStatus?.hasChanges ? 'Cambios pendientes' : 'Sincronizado'}
+              </span>
+            ` : isGit ? `
+              <span class="dev-status-pill neutral">Git local</span>
+            ` : `
+              <span class="dev-status-pill neutral">Sin conectar</span>
+            `}
+          </div>
         </div>
 
         <div class="dev-card-body">
@@ -574,7 +592,8 @@ export class DevelopmentPage {
     folderExists: boolean,
     counts: { all: number; todo: number; in_progress: number; done: number },
     completionRate: number,
-    allTasks: Task[]
+    allTasks: Task[],
+    githubAccount?: GitHubAccount | null
   ): string {
     const editor = settings.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' };
 
@@ -591,7 +610,7 @@ export class DevelopmentPage {
 
         <!-- 2. Rejilla de Métricas & Git (2 Tarjetas) -->
         <div class="dev-dashboard-grid">
-          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges)}
+          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges, githubAccount)}
           ${this.renderSprintCardHtml(completionRate, counts, specs, project)}
         </div>
 
@@ -672,7 +691,8 @@ export class DevelopmentPage {
     project: any,
     settings: any,
     gitStatus: GitStatusResult | null,
-    folderExists: boolean
+    folderExists: boolean,
+    githubAccount?: GitHubAccount | null
   ): string {
     const editor = settings.configuredEditor || { id: 'code', name: 'Visual Studio Code', command: 'code' };
 
@@ -690,7 +710,7 @@ export class DevelopmentPage {
         <!-- 2. Grid enfocado de Código & Git -->
         <div class="dev-code-grid">
           <!-- Tarjeta 1: GitHub & Control de Versiones -->
-          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges)}
+          ${this.renderGitCardHtml(isGit, isConnectedToGitHub, gitStatus, gitBranch, gitChanges, githubAccount)}
 
           <!-- Tarjeta 2: Herramientas del Entorno Local -->
           <div class="dev-card">
@@ -1178,6 +1198,8 @@ export class DevelopmentPage {
     specs: ProductSpec,
     settings: any
   ): void {
+    const devCodePath = project.folder_path ? `${project.folder_path}\\Development\\Proyecto` : '';
+
     // Subnav Tab Switching
     container.querySelectorAll('.dev-tab-item[data-dev-tab]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1337,6 +1359,14 @@ export class DevelopmentPage {
         } else {
           alert(res.message);
         }
+      });
+
+      // GitHub Account button in card
+      container.querySelector('#btn-dev-gh-account')?.addEventListener('click', () => {
+        modalManager.openGitHubAccountModal(async () => {
+          DevelopmentPage.cachedGitStatus = null;
+          await DevelopmentPage.render(container);
+        });
       });
 
       // Connect Repo

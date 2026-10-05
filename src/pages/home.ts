@@ -272,7 +272,7 @@ export class HomePage {
             </div>
             <div class="project-card-info">
               <div class="project-card-name">${p.name}</div>
-              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
                 <span class="project-type-chip type-${type}">
                   ${typeIcon}
                   <span>${typeLabel}</span>
@@ -283,22 +283,23 @@ export class HomePage {
                     <span>${statusText}</span>
                     ${icons.chevronDown(10)}
                   </button>
-                <div class="nubo-status-menu">
-                  <div class="nubo-status-option ${p.status === 'active' ? 'selected' : ''}" data-status="active">
-                    <span class="status-option-dot" style="background: #10B981; box-shadow: 0 0 6px rgba(16,185,129,0.4);"></span>
-                    <span>${t('status.active')}</span>
-                  </div>
-                  <div class="nubo-status-option ${p.status === 'completed' ? 'selected' : ''}" data-status="completed">
-                    <span class="status-option-dot" style="background: #3B82F6; box-shadow: 0 0 6px rgba(59,130,246,0.4);"></span>
-                    <span>${t('status.completed')}</span>
-                  </div>
-                  <div class="nubo-status-option ${p.status === 'paused' ? 'selected' : ''}" data-status="paused">
-                    <span class="status-option-dot" style="background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.4);"></span>
-                    <span>${t('status.paused')}</span>
-                  </div>
-                  <div class="nubo-status-option ${p.status === 'idea' ? 'selected' : ''}" data-status="idea">
-                    <span class="status-option-dot" style="background: #8B5CF6; box-shadow: 0 0 6px rgba(139,92,246,0.4);"></span>
-                    <span>${t('status.idea')}</span>
+                  <div class="nubo-status-menu">
+                    <div class="nubo-status-option ${p.status === 'active' ? 'selected' : ''}" data-status="active">
+                      <span class="status-option-dot" style="background: #10B981; box-shadow: 0 0 6px rgba(16,185,129,0.4);"></span>
+                      <span>${t('status.active')}</span>
+                    </div>
+                    <div class="nubo-status-option ${p.status === 'completed' ? 'selected' : ''}" data-status="completed">
+                      <span class="status-option-dot" style="background: #3B82F6; box-shadow: 0 0 6px rgba(59,130,246,0.4);"></span>
+                      <span>${t('status.completed')}</span>
+                    </div>
+                    <div class="nubo-status-option ${p.status === 'paused' ? 'selected' : ''}" data-status="paused">
+                      <span class="status-option-dot" style="background: #F59E0B; box-shadow: 0 0 6px rgba(245,158,11,0.4);"></span>
+                      <span>${t('status.paused')}</span>
+                    </div>
+                    <div class="nubo-status-option ${p.status === 'idea' ? 'selected' : ''}" data-status="idea">
+                      <span class="status-option-dot" style="background: #8B5CF6; box-shadow: 0 0 6px rgba(139,92,246,0.4);"></span>
+                      <span>${t('status.idea')}</span>
+                    </div>
                   </div>
                 </div>
               </div>

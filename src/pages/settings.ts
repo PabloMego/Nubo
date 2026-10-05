@@ -624,25 +624,49 @@ export class SettingsPage {
       }
     });
 
-    // 9. Export & Import Project
+    // 9. Export & Import Project (.nubo)
     container.querySelector('#btn-export-project')?.addEventListener('click', async () => {
       const currentProj = appStore.getState().currentProject;
       if (!currentProj) return;
 
-      const res = await window.nubo.backup.export(currentProj.id);
-      if (res.success) {
-        showToast(isEs ? `Proyecto exportado a ${res.filePath}` : `Project exported to ${res.filePath}`);
+      const btn = container.querySelector('#btn-export-project') as HTMLButtonElement | null;
+      if (btn) btn.disabled = true;
+      showToast(t('backup.exporting'));
+
+      try {
+        const res = await window.nubo.backup.export(currentProj.id);
+        if (res.success && res.filePath) {
+          showToast(t('backup.exportSuccess', { path: res.filePath }));
+        } else if (res.error) {
+          showToast(t('backup.exportError', { error: res.error }));
+        }
+      } catch (err: any) {
+        showToast(t('backup.exportError', { error: err?.message || String(err) }));
+      } finally {
+        if (btn) btn.disabled = false;
       }
     });
 
     container.querySelector('#btn-import-project')?.addEventListener('click', async () => {
-      const res = await window.nubo.backup.import();
-      if (res.success && res.project) {
-        showToast(isEs ? `Proyecto "${res.project.name}" importado con éxito.` : `Project "${res.project.name}" imported successfully.`);
-        const all = await window.nubo.projects.getAll();
-        appStore.setProjects(all);
-        appStore.setCurrentProject(res.project);
-        appStore.setActiveSection('overview');
+      const btn = container.querySelector('#btn-import-project') as HTMLButtonElement | null;
+      if (btn) btn.disabled = true;
+      showToast(t('backup.importing'));
+
+      try {
+        const res = await window.nubo.backup.import();
+        if (res.success && res.project) {
+          showToast(t('backup.importSuccess', { name: res.project.name }));
+          const all = await window.nubo.projects.getAll();
+          appStore.setProjects(all);
+          appStore.setCurrentProject(res.project);
+          appStore.setActiveSection('overview');
+        } else if (res.error) {
+          showToast(t('backup.importError', { error: res.error }));
+        }
+      } catch (err: any) {
+        showToast(t('backup.importError', { error: err?.message || String(err) }));
+      } finally {
+        if (btn) btn.disabled = false;
       }
     });
   }

@@ -446,8 +446,8 @@ declare global {
         query(q: string, projectId?: string): Promise<SearchResult[]>;
       };
       backup: {
-        export(projectId: string): Promise<{ success: boolean; filePath?: string }>;
-        import(): Promise<{ success: boolean; project?: Project }>;
+        export(projectId: string): Promise<{ success: boolean; filePath?: string; cancelled?: boolean; error?: string }>;
+        import(): Promise<{ success: boolean; project?: Project; cancelled?: boolean; error?: string }>;
       };
       dialog: {
         openFiles(options?: any): Promise<string[]>;

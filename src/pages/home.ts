@@ -22,6 +22,10 @@ export class HomePage {
           <p class="page-subtitle">${t('home.subtitle')}</p>
         </div>
         <div class="page-hero-actions">
+          <button class="btn btn-secondary" id="btn-import-project-home" title="${t('home.importProject')}">
+            ${icons.upload(15)}
+            <span>${t('home.importProject')}</span>
+          </button>
           <button class="btn btn-secondary" id="btn-open-projects-dir" title="${t('home.folderTooltip')}">
             ${icons.folder(15)}
             <span>${t('home.openProjectsFolder')}</span>
@@ -54,6 +58,28 @@ export class HomePage {
       modalManager.openNewProjectModal();
     });
 
+    // Import Project (.nubo archive)
+    container.querySelector('#btn-import-project-home')?.addEventListener('click', async () => {
+      const btn = container.querySelector('#btn-import-project-home') as HTMLButtonElement | null;
+      if (btn) btn.disabled = true;
+      try {
+        const res = await window.nubo.backup.import();
+        if (res.success && res.project) {
+          showToast(t('backup.importSuccess', { name: res.project.name }));
+          const all = await window.nubo.projects.getAll();
+          appStore.setProjects(all);
+          appStore.setCurrentProject(res.project);
+          appStore.setActiveSection('overview');
+        } else if (res.error) {
+          showToast(t('backup.importError', { error: res.error }));
+        }
+      } catch (err: any) {
+        showToast(t('backup.importError', { error: err?.message || String(err) }));
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
+
     // Open root projects directory
     container.querySelector('#btn-open-projects-dir')?.addEventListener('click', async () => {
       const settings = await window.nubo.settings.get();
@@ -68,7 +94,7 @@ export class HomePage {
       card.addEventListener('click', (e) => {
         // Prevent navigation if action buttons or status dropdown were clicked
         const target = e.target as HTMLElement;
-        if (target.closest('.btn-card-delete') || target.closest('.btn-card-folder') || target.closest('.nubo-status-dropdown')) {
+        if (target.closest('.btn-card-delete') || target.closest('.btn-card-folder') || target.closest('.btn-card-export') || target.closest('.nubo-status-dropdown')) {
           return;
         }
 
@@ -132,6 +158,31 @@ export class HomePage {
         const proj = projects.find((p) => p.id === id);
         if (proj?.folder_path) {
           window.nubo.files.openContainingFolder(proj.folder_path);
+        }
+      });
+    });
+
+    // Export individual project package (.nubo)
+    container.querySelectorAll('.btn-card-export').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-project-id');
+        const proj = projects.find((p) => p.id === id);
+        if (!proj) return;
+
+        (btn as HTMLButtonElement).disabled = true;
+        showToast(t('backup.exporting'));
+        try {
+          const res = await window.nubo.backup.export(proj.id);
+          if (res.success && res.filePath) {
+            showToast(t('backup.exportSuccess', { path: res.filePath }));
+          } else if (res.error) {
+            showToast(t('backup.exportError', { error: res.error }));
+          }
+        } catch (err: any) {
+          showToast(t('backup.exportError', { error: err?.message || String(err) }));
+        } finally {
+          (btn as HTMLButtonElement).disabled = false;
         }
       });
     });
@@ -250,6 +301,9 @@ export class HomePage {
           <div style="display: flex; gap: 2px;">
             <button class="btn btn-ghost btn-icon btn-sm btn-card-folder" data-project-id="${p.id}" title="${t('home.folderTooltip')}">
               ${icons.folder(14)}
+            </button>
+            <button class="btn btn-ghost btn-icon btn-sm btn-card-export" data-project-id="${p.id}" title="${t('home.exportTooltip')}">
+              ${icons.download(14)}
             </button>
             <button class="btn btn-ghost btn-icon btn-sm btn-card-delete" data-project-id="${p.id}" title="${t('home.deleteTooltip')}">
               ${icons.trash(14)}

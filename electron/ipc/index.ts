@@ -338,36 +338,57 @@ export function registerIpcHandlers(): void {
 
   // === Backup (Import / Export) ===
   ipcMain.handle('nubo:backup:export', async (event, projectId: string) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    const project = projectService.getById(projectId);
-    const defaultName = `${(project?.name || 'Project').replace(/\s+/g, '_')}.nubo`;
+    try {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      const project = projectService.getById(projectId);
+      if (!project) {
+        return { success: false, error: 'Proyecto no encontrado' };
+      }
 
-    const result = await dialog.showSaveDialog(win!, {
-      title: 'Exportar Proyecto Nubo',
-      defaultPath: defaultName,
-      filters: [{ name: 'Nubo Project Package', extensions: ['nubo', 'json'] }]
-    });
+      const defaultName = `${project.name.replace(/[<>:"/\\|?*]/g, '_')}.nubo`;
 
-    if (!result.canceled && result.filePath) {
-      backupService.exportProjectToJson(projectId, result.filePath);
-      return { success: true, filePath: result.filePath };
+      const result = await dialog.showSaveDialog(win!, {
+        title: `Exportar Proyecto Nubo - ${project.name}`,
+        defaultPath: defaultName,
+        filters: [
+          { name: 'Paquete de Proyecto Nubo (*.nubo)', extensions: ['nubo'] },
+          { name: 'Archivo ZIP (*.zip)', extensions: ['zip'] }
+        ]
+      });
+
+      if (!result.canceled && result.filePath) {
+        await backupService.exportProject(projectId, result.filePath);
+        return { success: true, filePath: result.filePath };
+      }
+      return { success: false, cancelled: true };
+    } catch (err: any) {
+      console.error('[IPC] Error in nubo:backup:export:', err);
+      return { success: false, error: err?.message || String(err) };
     }
-    return { success: false };
   });
 
   ipcMain.handle('nubo:backup:import', async (event) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    const result = await dialog.showOpenDialog(win!, {
-      title: 'Importar Proyecto Nubo',
-      properties: ['openFile'],
-      filters: [{ name: 'Nubo Project Package', extensions: ['nubo', 'json'] }]
-    });
+    try {
+      const win = BrowserWindow.fromWebContents(event.sender);
+      const result = await dialog.showOpenDialog(win!, {
+        title: 'Importar Proyecto Nubo (.nubo)',
+        properties: ['openFile'],
+        filters: [
+          { name: 'Paquete de Proyecto Nubo (*.nubo)', extensions: ['nubo'] },
+          { name: 'Archivo ZIP (*.zip)', extensions: ['zip'] },
+          { name: 'Manifiesto JSON Legacy (*.json)', extensions: ['json'] }
+        ]
+      });
 
-    if (!result.canceled && result.filePaths.length > 0) {
-      const imported = backupService.importProjectFromJson(result.filePaths[0]);
-      return { success: true, project: imported };
+      if (!result.canceled && result.filePaths.length > 0) {
+        const imported = await backupService.importProject(result.filePaths[0]);
+        return { success: true, project: imported };
+      }
+      return { success: false, cancelled: true };
+    } catch (err: any) {
+      console.error('[IPC] Error in nubo:backup:import:', err);
+      return { success: false, error: err?.message || String(err) };
     }
-    return { success: false };
   });
 
   // === Native Dialogs ===

@@ -30,6 +30,8 @@ const translations = {
     'home.deleteTooltip': 'Eliminar proyecto',
     'home.folderTooltip': 'Abrir carpeta en Explorador de Windows',
     'home.changeStatus': 'Cambiar estado del proyecto',
+    'home.importProject': 'Importar Proyecto (.nubo)',
+    'home.exportTooltip': 'Exportar paquete completo (.nubo)',
 
     // Delete Project Modal
     'deleteModal.title': 'Eliminar Proyecto',
@@ -426,6 +428,12 @@ const translations = {
     'settings.philosophyDesc': 'El hogar minimalista y visual de todo tu proyecto digital.',
     'settings.toastLang': 'Idioma cambiado a Español.',
     'settings.toastStorage': 'Ubicación de almacenamiento actualizada.',
+    'backup.exportSuccess': 'Proyecto exportado correctamente a {path}',
+    'backup.importSuccess': 'Proyecto "{name}" importado con éxito.',
+    'backup.exportError': 'Error al exportar el proyecto: {error}',
+    'backup.importError': 'Error al importar el proyecto: {error}',
+    'backup.exporting': 'Exportando paquete completo del proyecto...',
+    'backup.importing': 'Importando paquete y extrayendo archivos...',
 
     // Command Palette
     'cmd.placeholder': 'Buscar proyectos, tareas, archivos, notas... (Esc para salir)',
@@ -568,6 +576,8 @@ const translations = {
     'home.deleteTooltip': 'Delete project',
     'home.folderTooltip': 'Open folder in Windows Explorer',
     'home.changeStatus': 'Change project status',
+    'home.importProject': 'Import Project (.nubo)',
+    'home.exportTooltip': 'Export complete project package (.nubo)',
 
     // Delete Project Modal
     'deleteModal.title': 'Delete Project',
@@ -963,6 +973,12 @@ const translations = {
     'settings.philosophyDesc': 'The minimalist, personal home for your entire digital project.',
     'settings.toastLang': 'Language changed to English.',
     'settings.toastStorage': 'Storage location updated.',
+    'backup.exportSuccess': 'Project exported successfully to {path}',
+    'backup.importSuccess': 'Project "{name}" imported successfully.',
+    'backup.exportError': 'Error exporting project: {error}',
+    'backup.importError': 'Error importing project: {error}',
+    'backup.exporting': 'Exporting full project package...',
+    'backup.importing': 'Importing package and unbundling files...',
 
     // Command Palette
     'cmd.placeholder': 'Search projects, tasks, files, notes... (Esc to exit)',

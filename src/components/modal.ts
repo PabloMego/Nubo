@@ -125,14 +125,13 @@ export class ModalManager {
           'Script/Output',
           'Script/Config',
           'Script/Logs',
-          'Development/Proyecto',
           'Files',
           'Notes'
         ],
         starterFile: 'Script/Src/main.py',
         note: isEs
-          ? 'Genera estructura para scripts, entrada de datos (Input), salida procesada (Output), .env y logs.'
-          : 'Generates structure for scripts, raw data (Input), processed results (Output), .env and logs.'
+          ? 'Script rápido y personal: sin web, sin marca ni campañas. Solo tu código, datos y notas.'
+          : 'Quick personal script: no web, no branding, no marketing. Just your code, data and notes.'
       }
     };
 
@@ -186,7 +185,7 @@ export class ModalManager {
         <label class="form-label">${t('newProj.description')}</label>
         <textarea id="new-proj-desc" rows="2" placeholder="${t('newProj.descPlaceholder')}"></textarea>
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
+      <div id="new-proj-web-gh-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;">
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <label class="form-label" style="margin: 0;">${t('newProj.website')}</label>
@@ -260,6 +259,18 @@ export class ModalManager {
       }
     };
 
+    const webGhContainer = document.getElementById('new-proj-web-gh-container');
+
+    const updateFieldsForType = (type: ProjectTypeOption) => {
+      if (webGhContainer) {
+        if (type === 'script') {
+          webGhContainer.style.display = 'none';
+        } else {
+          webGhContainer.style.display = 'grid';
+        }
+      }
+    };
+
     typeCards.forEach(card => {
       card.addEventListener('click', () => {
         typeCards.forEach(c => c.classList.remove('selected'));
@@ -268,11 +279,13 @@ export class ModalManager {
         if (type) {
           selectedType = type;
           renderTypePreview(selectedType);
+          updateFieldsForType(selectedType);
         }
       });
     });
 
     renderTypePreview(selectedType);
+    updateFieldsForType(selectedType);
 
     nameInput?.focus();
 
@@ -312,8 +325,8 @@ export class ModalManager {
       }
 
       const desc = (document.getElementById('new-proj-desc') as HTMLTextAreaElement).value;
-      const web = noWebCheck.checked ? '' : webInput.value.trim();
-      const gh = (document.getElementById('new-proj-github') as HTMLInputElement).value.trim();
+      const web = selectedType === 'script' ? '' : (noWebCheck.checked ? '' : webInput.value.trim());
+      const gh = selectedType === 'script' ? '' : (document.getElementById('new-proj-github') as HTMLInputElement).value.trim();
       const color = (document.getElementById('new-proj-color') as HTMLInputElement).value;
 
       try {

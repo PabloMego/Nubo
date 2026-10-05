@@ -64,10 +64,6 @@ export class FileService {
         path.join('Script', 'Output'),
         path.join('Script', 'Config'),
         path.join('Script', 'Logs'),
-        'Development',
-        path.join('Development', 'Proyecto'),
-        'Brand',
-        path.join('Brand', 'Logos'),
         'Files',
         'Notes'
       ];
@@ -254,6 +250,11 @@ if __name__ == "__main__":
   }
 
   public ensureBrandFolderStructure(projectRoot: string): void {
+    // Scripts are personal quick tools: do not generate Brand, Website, or Marketing folders
+    if (fs.existsSync(path.join(projectRoot, 'Script')) && !fs.existsSync(path.join(projectRoot, 'Website')) && !fs.existsSync(path.join(projectRoot, 'Development', 'Build'))) {
+      return;
+    }
+
     const subfolders = [
       'Brand',
       path.join('Brand', 'Logos'),

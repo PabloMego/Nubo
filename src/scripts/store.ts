@@ -72,12 +72,25 @@ class Store {
     if (project && (this.state.activeSection === 'settings' || this.state.activeSection === 'home')) {
       this.state.activeSection = 'overview';
     }
+    if (project?.project_type === 'script') {
+      const nonScriptSections: AppSection[] = ['brand', 'website', 'marketing', 'content', 'guide'];
+      if (nonScriptSections.includes(this.state.activeSection)) {
+        this.state.activeSection = 'overview';
+      }
+    }
     this.notify();
   }
 
   public selectProject(project: Project | null, section: AppSection = 'overview') {
     this.state.currentProject = project;
-    this.state.activeSection = section;
+    let targetSection = section;
+    if (project?.project_type === 'script') {
+      const nonScriptSections: AppSection[] = ['brand', 'website', 'marketing', 'content', 'guide'];
+      if (nonScriptSections.includes(targetSection)) {
+        targetSection = 'overview';
+      }
+    }
+    this.state.activeSection = targetSection;
     this.notify();
   }
 

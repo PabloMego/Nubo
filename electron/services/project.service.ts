@@ -84,7 +84,7 @@ export class ProjectService {
 
     if (!project) return undefined;
 
-    if (project.folder_path) {
+    if (project.folder_path && project.project_type !== 'script') {
       try {
         this.fileService.ensureBrandFolderStructure(project.folder_path);
       } catch (err) {

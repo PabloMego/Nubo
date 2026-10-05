@@ -232,6 +232,14 @@ export class DevelopmentService {
         fs.mkdirSync(norm, { recursive: true });
       }
 
+      // If it's a script project, ensure Script folders only
+      if (fs.existsSync(path.join(norm, 'Script')) && !fs.existsSync(path.join(norm, 'Website')) && !fs.existsSync(path.join(norm, 'Development', 'Build'))) {
+        const scriptSrc = path.join(norm, 'Script', 'Src');
+        if (!fs.existsSync(scriptSrc)) fs.mkdirSync(scriptSrc, { recursive: true });
+        this.fileService.createProjectFolderStructure(norm, 'script');
+        return { success: true, path: norm, folders: ['Script', 'Script/Src'] };
+      }
+
       // Ensure Development folder exists
       const devFolder = path.join(norm, 'Development');
       if (!fs.existsSync(devFolder)) {
@@ -251,7 +259,7 @@ export class DevelopmentService {
       }
 
       // Ensure full project structure
-      this.fileService.createProjectFolderStructure(norm);
+      this.fileService.createProjectFolderStructure(norm, 'program');
 
       return { success: true, path: norm, folders: ['Development', 'Development/Proyecto', 'Development/Build'] };
     } catch (err: any) {

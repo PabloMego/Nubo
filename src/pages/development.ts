@@ -37,8 +37,15 @@ export class DevelopmentPage {
     if (!project) return;
 
     try {
-      // Dedicated Development folder path: Project/Development/Proyecto
-      const devCodePath = project.folder_path ? `${project.folder_path}\\Development\\Proyecto` : '';
+      const isScript = project.project_type === 'script';
+      // Dedicated folder path: Script for scripts, Development/Proyecto for apps/programs
+      const devCodePath = project.folder_path
+        ? (isScript ? `${project.folder_path}\\Script` : `${project.folder_path}\\Development\\Proyecto`)
+        : '';
+
+      if (isScript && DevelopmentPage.activeTab === 'build') {
+        DevelopmentPage.activeTab = 'all';
+      }
 
       // Invalidate git status cache if switched to a different project/folder
       if (DevelopmentPage.cachedGitStatusFolder !== devCodePath) {
@@ -170,13 +177,13 @@ export class DevelopmentPage {
           <div class="dev-header-hero">
             <div class="dev-header-left">
               <div class="dev-title-row">
-                <h1>${t('dev.title')}</h1>
+                <h1>${isScript ? (getLanguage() === 'es' ? 'Script & Terminal' : 'Script & Terminal') : t('dev.title')}</h1>
                 <div class="dev-header-stats-badge">
                   ${icons.checkCircle(13)}
                   <span>${counts.all > 0 ? `${completionRate}% ${t('dev.progress')}` : (getLanguage() === 'es' ? 'Sin tareas' : 'No tasks')}</span>
                 </div>
               </div>
-              <p class="dev-subtitle">${t('dev.subtitle')}</p>
+              <p class="dev-subtitle">${isScript ? (getLanguage() === 'es' ? 'Código fuente del script, terminal CLI, ejecuciones y tareas.' : 'Script source code, CLI terminal, execution and tasks.') : t('dev.subtitle')}</p>
             </div>
 
             <div class="dev-header-actions">
@@ -195,8 +202,8 @@ export class DevelopmentPage {
               <span>${t('dev.tabAll') || 'Todo'}</span>
             </button>
             <button class="dev-tab-item ${DevelopmentPage.activeTab === 'code' ? 'active' : ''}" data-dev-tab="code">
-              ${icons.code(14)}
-              <span>${t('dev.tabCode') || 'Código & Git'}</span>
+              ${isScript ? icons.terminal(14) : icons.code(14)}
+              <span>${isScript ? (getLanguage() === 'es' ? 'Script & Git' : 'Script & Git') : (t('dev.tabCode') || 'Código & Git')}</span>
             </button>
             <button class="dev-tab-item ${DevelopmentPage.activeTab === 'kanban' ? 'active' : ''}" data-dev-tab="kanban">
               ${icons.columns(14)}
@@ -204,12 +211,14 @@ export class DevelopmentPage {
             </button>
             <button class="dev-tab-item ${DevelopmentPage.activeTab === 'specs' ? 'active' : ''}" data-dev-tab="specs">
               ${icons.fileText(14)}
-              <span>${t('dev.tabSpecs') || 'Especificaciones'}</span>
+              <span>${isScript ? (getLanguage() === 'es' ? 'Parámetros & Docs' : 'Specs & Docs') : (t('dev.tabSpecs') || 'Especificaciones')}</span>
             </button>
-            <button class="dev-tab-item ${DevelopmentPage.activeTab === 'build' ? 'active' : ''}" data-dev-tab="build">
-              ${icons.package(14)}
-              <span>${t('dev.tabBuild') || 'Build & .exe'}</span>
-            </button>
+            ${!isScript ? `
+              <button class="dev-tab-item ${DevelopmentPage.activeTab === 'build' ? 'active' : ''}" data-dev-tab="build">
+                ${icons.package(14)}
+                <span>${t('dev.tabBuild') || 'Build & .exe'}</span>
+              </button>
+            ` : ''}
           </div>
 
           <!-- TAB CONTENT -->

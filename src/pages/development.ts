@@ -20,12 +20,25 @@ export class DevelopmentPage {
 
   // Cached git and specs state
   private static cachedGitStatus: GitStatusResult | null = null;
+  private static cachedGitStatusFolder: string | null = null;
   private static cachedSpecs: ProductSpec | null = null;
   private static isLoadingGit: boolean = false;
+
+  public static clearCache(): void {
+    DevelopmentPage.cachedGitStatus = null;
+    DevelopmentPage.cachedGitStatusFolder = null;
+    DevelopmentPage.cachedSpecs = null;
+  }
 
   public static async render(container: HTMLElement): Promise<void> {
     const project = appStore.getState().currentProject;
     if (!project) return;
+
+    // Invalidate git status cache if switched to a different project/folder
+    if (DevelopmentPage.cachedGitStatusFolder !== project.folder_path) {
+      DevelopmentPage.cachedGitStatus = null;
+      DevelopmentPage.cachedGitStatusFolder = project.folder_path;
+    }
 
     // Ensure development folders exist on disk
     if (project.folder_path) {

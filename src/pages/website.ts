@@ -27,6 +27,11 @@ export class WebsitePageView {
   private static cachedGitStatus: GitStatusResult | null = null;
   private static cachedWebsitePath: string = '';
 
+  public static clearCache(): void {
+    WebsitePageView.cachedGitStatus = null;
+    WebsitePageView.cachedWebsitePath = '';
+  }
+
   public static async render(container: HTMLElement): Promise<void> {
     const project = appStore.getState().currentProject;
     if (!project) return;
@@ -38,7 +43,12 @@ export class WebsitePageView {
       ? (project.folder_path.endsWith('Website') ? project.folder_path : `${project.folder_path}\\Website`)
       : '';
     const websiteCodePath = websiteBase ? `${websiteBase}\\Proyecto` : '';
-    WebsitePageView.cachedWebsitePath = websiteCodePath;
+
+    // Invalidate git status cache if switched to a different project or website path
+    if (WebsitePageView.cachedWebsitePath !== websiteCodePath) {
+      WebsitePageView.cachedGitStatus = null;
+      WebsitePageView.cachedWebsitePath = websiteCodePath;
+    }
 
     // Ensure dedicated website folders exist on disk (Website, Website/Proyecto, Website/Design, Website/Referencias)
     if (project.folder_path) {

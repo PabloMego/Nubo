@@ -13,11 +13,18 @@ import { SettingsPage } from '../pages/settings';
 
 export class NavigationRouter {
   private viewContainer: HTMLElement;
+  private lastProjectId: string | null = null;
 
   constructor(viewContainer: HTMLElement) {
     this.viewContainer = viewContainer;
 
     appStore.subscribe((state) => {
+      const currentId = state.currentProject?.id || null;
+      if (this.lastProjectId !== currentId) {
+        this.lastProjectId = currentId;
+        DevelopmentPage.clearCache();
+        WebsitePageView.clearCache();
+      }
       this.route(state.activeSection);
     });
   }

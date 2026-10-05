@@ -463,6 +463,32 @@ export class DevelopmentService {
     return devProyecto;
   }
 
+  /**
+   * Checks whether the target folder is actually a valid Git repository for this project,
+   * preventing stray parent repositories (like C:\Users\<name>\.git) from falsely capturing this folder.
+   */
+  public async isProjectGitRepo(target: string, folderPath?: string): Promise<boolean> {
+    if (!fs.existsSync(target)) return false;
+
+    // Direct .git directory in target or folderPath
+    if (fs.existsSync(path.join(target, '.git'))) return true;
+    if (folderPath && fs.existsSync(path.join(folderPath, '.git'))) return true;
+
+    // Check git work tree
+    const isInside = await this.runExec('git rev-parse --is-inside-work-tree', target).catch(() => 'false');
+    if (isInside !== 'true') return false;
+
+    // Ensure the top-level repo is actually inside the project and not in an unrelated parent like C:\Users\<username>
+    const topLevel = await this.runExec('git rev-parse --show-toplevel', target).catch(() => '');
+    if (!topLevel) return false;
+
+    const normTop = path.normalize(topLevel).toLowerCase();
+    const normTarget = path.normalize(target).toLowerCase();
+    const normFolder = folderPath ? path.normalize(folderPath).toLowerCase() : '';
+
+    return normTop === normTarget || (normFolder !== '' && (normTop === normFolder || normTop.startsWith(normFolder + path.sep)));
+  }
+
   public async getGitStatus(folderPath: string): Promise<GitStatusResult> {
     const target = this.getGitWorkingDir(folderPath);
     if (!fs.existsSync(target)) {
@@ -493,9 +519,9 @@ export class DevelopmentService {
         };
       }
 
-      // Check if it's a git repo
-      const isInsideWorkTree = await this.runExec('git rev-parse --is-inside-work-tree', target).catch(() => 'false');
-      if (isInsideWorkTree !== 'true') {
+      // Check if it's a git repo belonging to this project
+      const isRepo = await this.isProjectGitRepo(target, folderPath);
+      if (!isRepo) {
         return {
           isGitRepo: false,
           gitInstalled: true,
@@ -723,6 +749,10 @@ export class DevelopmentService {
   public async gitDisconnectRemote(folderPath: string): Promise<{ success: boolean; message: string }> {
     const target = this.getGitWorkingDir(folderPath);
     try {
+      const isRepo = await this.isProjectGitRepo(target, folderPath);
+      if (!isRepo) {
+        return { success: true, message: 'No había ningún repositorio remoto conectado.' };
+      }
       const existing = await this.runExec('git remote', target).catch(() => '');
       if (existing.includes('origin')) {
         await this.runExec('git remote remove origin', target);
@@ -776,9 +806,9 @@ export class DevelopmentService {
     }
 
     try {
-      // 1. Ensure git repo initialized
-      const isInside = await this.runExec('git rev-parse --is-inside-work-tree', target).catch(() => 'false');
-      if (isInside !== 'true') {
+      // 1. Ensure git repo initialized for this specific project folder
+      const isRepo = await this.isProjectGitRepo(target, folderPath);
+      if (!isRepo) {
         await this.runExec('git init', target);
       }
 
@@ -858,9 +888,9 @@ export class DevelopmentService {
     }
 
     try {
-      // 1. Check if git repo
-      const isInside = await this.runExec('git rev-parse --is-inside-work-tree', target).catch(() => 'false');
-      if (isInside !== 'true') {
+      // 1. Check if git repo belonging to this project
+      const isRepo = await this.isProjectGitRepo(target, folderPath);
+      if (!isRepo) {
         return { success: false, message: 'El proyecto no está inicializado como repositorio Git.' };
       }
 

@@ -60,13 +60,12 @@ export class SettingsPage {
           <button class="settings-tab-btn ${this.activeTab === 'github' ? 'active' : ''}" data-tab="github" role="tab">
             ${icons.github(15)}
             <span>${t('settings.tabGithub')}</span>
-            ${githubAccount ? `<span class="settings-tab-badge">@${githubAccount.username}</span>` : ''}
+            ${githubAccount ? `<span class="pulse-dot" style="background: #10b981; width: 6px; height: 6px; margin-left: 2px;" title="${isEs ? 'Cuenta conectada' : 'Connected'}"></span>` : ''}
           </button>
 
           <button class="settings-tab-btn ${this.activeTab === 'editor' ? 'active' : ''}" data-tab="editor" role="tab">
             ${icons.code(15)}
             <span>${t('settings.tabEditor')}</span>
-            <span class="settings-tab-badge" style="background: rgba(14, 165, 233, 0.12); color: #0284c7;">${activeEditor.name}</span>
           </button>
 
           <button class="settings-tab-btn ${this.activeTab === 'storage' ? 'active' : ''}" data-tab="storage" role="tab">

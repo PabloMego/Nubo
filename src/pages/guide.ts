@@ -136,17 +136,17 @@ export class GuidePage {
             </div>
             <div class="guide-rule-text">
               <strong>${isEs ? 'Recomendación de Nubo:' : 'Nubo Best Practice:'}</strong> 
-              ${isEs ? 'Valida primero la funcionalidad, dale identidad con tu marca, arma tu escaparate web y finalmente ejecuta el marketing.' : 'First validate the functionality, give it brand identity, build your website storefront, and finally execute marketing.'}
+              ${isEs ? '1) Haz primero el prototipo funcional ("feo"). 2) Define la identidad en Marca & Assets. 3) Vuelve al Paso 1 para aplicar el estilo de la marca al prototipo. 4) Construye tu Web y ejecuta Marketing.' : '1) Build the functional ("ugly") prototype first. 2) Define identity in Brand & Assets. 3) Return to Step 1 to style the prototype with the brand. 4) Build Website & launch Marketing.'}
             </div>
           </div>
           <div class="guide-rule-flow">
-            <span class="guide-rule-flow-step">${isEs ? '1. Prototipo' : '1. Prototype'}</span>
+            <span class="guide-rule-flow-step">${isEs ? '1. Prototipo Feo' : '1. Ugly MVP'}</span>
             <span>→</span>
             <span class="guide-rule-flow-step">${isEs ? '2. Marca' : '2. Brand'}</span>
             <span>→</span>
-            <span class="guide-rule-flow-step">${isEs ? '3. Web' : '3. Website'}</span>
+            <span class="guide-rule-flow-step" title="Volver al Paso 1 para aplicar el estilo">${isEs ? '3. Aplicar Marca (Paso 1)' : '3. Apply Brand (Step 1)'}</span>
             <span>→</span>
-            <span class="guide-rule-flow-step">${isEs ? '4. Marketing' : '4. Marketing'}</span>
+            <span class="guide-rule-flow-step">${isEs ? '4. Web & Mkt' : '4. Web & Mkt'}</span>
           </div>
         </div>
       </div>
@@ -188,15 +188,15 @@ export class GuidePage {
         id: 'prototype',
         number: '01',
         tag: isEs ? 'PASO 01 · TÉCNICA' : 'STEP 01 · TECH',
-        title: isEs ? 'Archivos y Prototipo' : 'Files & Prototype',
+        title: isEs ? 'Archivos y Prototipo (Feo)' : 'Files & Prototype (Ugly)',
         tagline: isEs 
-          ? 'Especificaciones del producto, estructura de carpetas y prototipo funcional probado.'
-          : 'Product specifications, project folder structure, and tested functional MVP.',
+          ? 'Especificaciones del producto, estructura de carpetas y prototipo funcional inicial ("prototipo feo").'
+          : 'Product specifications, project folder structure, and initial functional MVP ("ugly prototype").',
         accent: '#3B82F6',
         bgLight: 'rgba(59, 130, 246, 0.12)',
         icon: (s = 24) => icons.code(s),
         deliverables: [
-          { icon: icons.check, label: isEs ? 'Prototipo funcional mínimo (MVP)' : 'Functional minimum viable product' },
+          { icon: icons.check, label: isEs ? 'Prototipo funcional mínimo ("prototipo feo")' : 'Initial functional prototype ("ugly prototype")' },
           { icon: icons.folder, label: isEs ? 'Estructura de archivos y repo Git' : 'Folder structure and Git repository' },
           { icon: icons.fileText, label: isEs ? 'Especificaciones y backlog de tareas' : 'Specifications and task backlog' }
         ],
@@ -215,19 +215,23 @@ export class GuidePage {
         tag: isEs ? 'PASO 02 · IDENTIDAD' : 'STEP 02 · IDENTITY',
         title: isEs ? 'Marca e Identidad' : 'Brand & Assets',
         tagline: isEs
-          ? 'Personalidad visual: archivo maestro de Illustrator (.ai), logotipos y paleta de colores.'
-          : 'Visual personality: Illustrator master file (.ai), official logos, and color palette.',
+          ? 'Personalidad visual: define logos, colores y vuelve al Paso 1 para hacer el prototipo feo con el estilo definido de la marca.'
+          : 'Visual personality: define logos, colors, and return to Step 1 to style the ugly prototype with the defined brand.',
         accent: '#EC4899',
         bgLight: 'rgba(236, 72, 153, 0.12)',
         icon: (s = 24) => icons.palette(s),
         deliverables: [
-          { icon: icons.file, label: isEs ? 'Archivo maestro Illustrator (.ai)' : 'Master Illustrator file (.ai)' },
-          { icon: icons.image, label: isEs ? 'Logotipos oficiales (SVG / PNG)' : 'Official logos (SVG / PNG)' },
-          { icon: icons.sparkles, label: isEs ? 'Paleta de colores HEX y tipografías' : 'HEX color palette and typography' }
+          { icon: icons.file, label: isEs ? 'Archivo maestro Illustrator (.ai) y logos' : 'Master Illustrator file (.ai) & official logos' },
+          { icon: icons.sparkles, label: isEs ? 'Paleta de colores HEX y tipografías' : 'HEX color palette and typography' },
+          { icon: icons.arrowRight, label: isEs ? 'Paso 3: Volver a Paso 1 para hacer el prototipo feo con el estilo definido de la marca' : 'Step 3: Return to Step 1 to make the ugly prototype with the defined brand style' }
         ],
         primaryAction: {
           label: isEs ? 'Ir a Marca & Assets' : 'Go to Brand & Assets',
           section: 'brand'
+        },
+        secondaryAction: {
+          label: isEs ? 'Volver a Paso 1' : 'Back to Step 1',
+          section: 'development'
         }
       },
       {
